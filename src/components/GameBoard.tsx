@@ -12,7 +12,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTile, setSelectedTile] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(2); // 200% zoom na start
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -41,9 +41,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           const freshStats = await response.json();
           updatePlayerStats(freshStats);
           setGameState({ ...savedState, playerStats: freshStats });
+          // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
+          setTimeout(() => centerOnLastUnlockedTile(), 100);
         } else {
           console.error('Błąd podczas pobierania statystyk');
           setGameState(savedState);
+          // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
+          setTimeout(() => centerOnLastUnlockedTile(), 100);
         }
       } else {
         // Nowa gra - pobierz statystyki i stwórz nowy stan
@@ -107,6 +111,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           };
           saveGameState(newGameState);
           setGameState(newGameState);
+          // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
+          setTimeout(() => centerOnLastUnlockedTile(), 100);
         } else {
           throw new Error('Gracz nie został znaleziony w systemie OSRS. Sprawdź czy nazwa jest poprawna.');
         }
@@ -187,6 +193,37 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     handleZoom(delta);
+  };
+
+  // Centrowanie na ostatnim odblokowanym kafelku
+  const centerOnLastUnlockedTile = () => {
+    if (!gameState || gameState.unlockedTiles.length === 0) {
+      // Jeśli brak odblokowanych kafelków, wycentruj na (0,0)
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    // Znajdź ostatni odblokowany kafelek
+    const lastUnlockedTile = gameState.unlockedTiles[gameState.unlockedTiles.length - 1];
+    if (!lastUnlockedTile) return;
+    
+    const [x, y] = lastUnlockedTile.split(',').map(Number);
+    if (x === undefined || y === undefined) return;
+    
+    // Wycentruj na tym kafelku
+    // Kafelek ma rozmiar 88px (80px + 8px gap), więc centrum to x * 88 + 44
+    const tileCenterX = x * 88 + 44;
+    const tileCenterY = y * 88 + 44;
+    
+    // Wycentruj na środku ekranu (uwzględniając zoom)
+    const screenCenterX = window.innerWidth / 2;
+    const screenCenterY = window.innerHeight / 2;
+    
+    // Oblicz offset potrzebny do wycentrowania
+    const offsetX = screenCenterX - tileCenterX;
+    const offsetY = screenCenterY - tileCenterY;
+    
+    setPan({ x: offsetX, y: offsetY });
   };
 
 
@@ -351,6 +388,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             >
               -
             </button>
+            <button
+              onClick={centerOnLastUnlockedTile}
+              className="w-10 h-10 bg-gray-800 text-white border border-gray-600 rounded hover:bg-gray-700"
+              title="Wycentruj na ostatnim odblokowanym kafelku"
+            >
+              🎯
+            </button>
             <div className="w-10 h-10 bg-gray-800 text-white border border-gray-600 rounded flex items-center justify-center text-xs">
               {Math.round(zoom * 100)}%
             </div>
@@ -393,8 +437,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                       }
                     `}
                     style={{
-                      left: `${(x + 10) * 88}px`, // 88px = 80px (width) + 8px (gap)
-                      top: `${(y + 10) * 88}px`,
+                      left: `${x * 88}px`, // 88px = 80px (width) + 8px (gap)
+                      top: `${y * 88}px`,
                       imageRendering: 'pixelated',
                       fontFamily: 'monospace'
                     }}
