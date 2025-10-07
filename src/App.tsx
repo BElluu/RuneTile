@@ -1,16 +1,37 @@
 import { GameBoard } from "./components/GameBoard";
 import "./index.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { loadGameState } from "./utils/gameStorage";
 
 export function App() {
   const [playerName, setPlayerName] = useState("");
   const [showGame, setShowGame] = useState(false);
+  const [isCheckingSavedGame, setIsCheckingSavedGame] = useState(true);
+
+  // Sprawdź czy istnieje zapisany gracz przy starcie
+  useEffect(() => {
+    const savedGame = loadGameState();
+    if (savedGame && savedGame.playerName) {
+      setPlayerName(savedGame.playerName);
+      setShowGame(true);
+    }
+    setIsCheckingSavedGame(false);
+  }, []);
 
   const handleStartGame = () => {
     if (playerName.trim()) {
       setShowGame(true);
     }
   };
+
+
+  if (isCheckingSavedGame) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-lg">Sprawdzanie zapisanej gry...</div>
+      </div>
+    );
+  }
 
   if (showGame) {
     return (

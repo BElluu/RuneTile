@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GameState, Tile, TileState, Task } from '@/types/game';
+import type { GameState, Tile, TileState, Task, TaskCategory } from '@/types/game';
 import { loadGameState, saveGameState, updatePlayerStats } from '@/utils/gameStorage';
 import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile } from '@/utils/gameLogic';
 
@@ -16,16 +16,20 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [error, setError] = useState<string | null>(null);
 
-  // Załaduj stan gry przy starcie
+  // Załaduj stan gry przy starcie tylko jeśli gracz jest już zapisany
   useEffect(() => {
-    if (playerName) {
+    const savedGame = loadGameState();
+    if (savedGame && savedGame.playerName === playerName.toLowerCase()) {
+      // Automatycznie załaduj zapisanego gracza
       loadGame();
     }
-  }, [playerName]);
+  }, []);
 
   const loadGame = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       // Sprawdź czy istnieje zapisany stan gry
       const savedState = loadGameState();
@@ -58,7 +62,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 id: 'slayer_master',
                 name: 'Slayer Tasks',
                 description: 'Wykonaj zadania od Slayer Mastera',
-                category: 'slayer' as const,
+                category: 'slayer' as TaskCategory,
                 keysRewarded: 1,
                 completed: false,
                 currentCount: 0,
@@ -69,7 +73,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 id: 'dungeon_clear',
                 name: 'Dungeons',
                 description: 'Wykonaj dungeons',
-                category: 'dungeon' as const,
+                category: 'dungeon' as TaskCategory,
                 keysRewarded: 2,
                 completed: false,
                 currentCount: 0,
@@ -80,7 +84,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 id: 'boss_kill',
                 name: 'Barrows',
                 description: 'Zabij bossów Barrows',
-                category: 'boss' as const,
+                category: 'boss' as TaskCategory,
                 keysRewarded: 3,
                 completed: false,
                 currentCount: 0,
@@ -91,7 +95,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 id: 'collection_log',
                 name: 'Collection Log',
                 description: 'Wypełnij wpisy w Collection Log',
-                category: 'collection_log' as const,
+                category: 'collection_log' as TaskCategory,
                 keysRewarded: 1,
                 completed: false,
                 currentCount: 0,
@@ -104,12 +108,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           saveGameState(newGameState);
           setGameState(newGameState);
         } else {
-          throw new Error('Nie można pobrać statystyk gracza');
+          throw new Error('Gracz nie został znaleziony w systemie OSRS. Sprawdź czy nazwa jest poprawna.');
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Błąd podczas ładowania gry:', error);
-      alert('Błąd podczas ładowania gry. Sprawdź czy nazwa gracza jest poprawna.');
+      setError(error instanceof Error ? error.message : 'Nieznany błąd');
     } finally {
       setIsLoading(false);
     }
@@ -123,8 +127,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         const newGameState = unlockTile(tileId, gameState);
         setGameState(newGameState);
         saveGameState(newGameState);
-      } catch (error) {
-        alert(error.message);
+      } catch (error: unknown) {
+        alert(error instanceof Error ? error.message : 'Nieznany błąd');
       }
     } else {
       setSelectedTile(tileId);
@@ -185,25 +189,84 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     handleZoom(delta);
   };
 
-  if (isLoading) {
+
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Ładowanie gry...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="bg-gray-900 p-8 rounded-lg border-2 border-red-700 max-w-md w-full">
+          <h1 className="text-2xl font-bold text-red-400 text-center mb-4">Błąd</h1>
+          <p className="text-gray-300 text-center mb-6">{error}</p>
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={playerName}
+              onChange={(e) => onPlayerNameChange(e.target.value)}
+              placeholder="Wprowadź poprawną nazwę gracza"
+              disabled={isLoading}
+              className={`w-full px-4 py-2 bg-gray-800 text-white border rounded focus:outline-none ${
+                isLoading 
+                  ? 'border-gray-500 cursor-not-allowed opacity-50' 
+                  : 'border-gray-600 focus:border-blue-500'
+              }`}
+              onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
+            />
+            <button
+              onClick={() => loadGame()}
+              disabled={isLoading}
+              className={`w-full px-6 py-2 rounded ${
+                isLoading
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white`}
+            >
+              {isLoading ? 'Sprawdzanie gracza...' : 'Spróbuj ponownie'}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!gameState) {
     return (
-      <div className="text-center">
-        <div className="text-lg mb-4">Wprowadź nazwę gracza aby rozpocząć</div>
-        <input
-          type="text"
-          value={playerName}
-          onChange={(e) => onPlayerNameChange(e.target.value)}
-          placeholder="Nazwa gracza"
-          className="px-4 py-2 border rounded"
-        />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="bg-gray-900 p-8 rounded-lg border-2 border-gray-700 max-w-md w-full">
+          <h1 className="text-3xl font-bold text-white text-center mb-6">RuneTile</h1>
+          <p className="text-gray-300 text-center mb-6">
+            Companion aplikacja dla RuneScape Old School
+          </p>
+          
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={playerName}
+              onChange={(e) => onPlayerNameChange(e.target.value)}
+              placeholder="Wprowadź nazwę gracza"
+              disabled={isLoading}
+              className={`w-full px-4 py-2 bg-gray-800 text-white border rounded focus:outline-none ${
+                isLoading 
+                  ? 'border-gray-500 cursor-not-allowed opacity-50' 
+                  : 'border-gray-600 focus:border-blue-500'
+              }`}
+              onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
+            />
+            <button
+              onClick={() => loadGame()}
+              disabled={!playerName.trim() || isLoading}
+              className={`w-full px-6 py-2 rounded ${
+                isLoading
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } ${
+                !playerName.trim() && !isLoading
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : ''
+              } text-white`}
+            >
+              {isLoading ? 'Sprawdzanie gracza...' : 'Rozpocznij grę'}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
