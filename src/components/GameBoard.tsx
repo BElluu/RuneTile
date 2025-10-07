@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { GameState, Tile, TileState, Task, TaskCategory } from '@/types/game';
 import { loadGameState, saveGameState, updatePlayerStats } from '@/utils/gameStorage';
 import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile } from '@/utils/gameLogic';
+import { SkillsPanel } from './SkillsPanel';
 
 interface GameBoardProps {
   playerName: string;
@@ -61,52 +62,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             unlockedTiles: [],
             completedTiles: [],
             visibleTiles: ['0,0'],
-            keySources: [
-              {
-                id: 'slayer_master',
-                name: 'Slayer Tasks',
-                description: 'Wykonaj zadania od Slayer Mastera',
-                category: 'slayer' as TaskCategory,
-                keysRewarded: 1,
-                completed: false,
-                currentCount: 0,
-                requiredCount: 5,
-                icon: '💀'
-              },
-              {
-                id: 'dungeon_clear',
-                name: 'Dungeons',
-                description: 'Wykonaj dungeons',
-                category: 'dungeon' as TaskCategory,
-                keysRewarded: 2,
-                completed: false,
-                currentCount: 0,
-                requiredCount: 3,
-                icon: '🏰'
-              },
-              {
-                id: 'boss_kill',
-                name: 'Barrows',
-                description: 'Zabij bossów Barrows',
-                category: 'boss' as TaskCategory,
-                keysRewarded: 3,
-                completed: false,
-                currentCount: 0,
-                requiredCount: 5,
-                icon: '⚔️'
-              },
-              {
-                id: 'collection_log',
-                name: 'Collection Log',
-                description: 'Wypełnij wpisy w Collection Log',
-                category: 'collection_log' as TaskCategory,
-                keysRewarded: 1,
-                completed: false,
-                currentCount: 0,
-                requiredCount: 10,
-                icon: '📋'
-              }
-            ],
+            keySources: [],
             lastUpdated: Date.now()
           };
           saveGameState(newGameState);
@@ -141,31 +97,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     }
   };
 
-  const handleKeySourceIncrement = (sourceId: string) => {
-    if (!gameState) return;
-    
-    const source = gameState.keySources.find(s => s.id === sourceId);
-    if (source && !source.completed) {
-      const newCount = source.currentCount + 1;
-      const isCompleted = newCount >= source.requiredCount;
-      
-      const newGameState = {
-        ...gameState,
-        keys: isCompleted ? gameState.keys + source.keysRewarded : gameState.keys,
-        keySources: gameState.keySources.map(s => 
-          s.id === sourceId 
-            ? { 
-                ...s, 
-                currentCount: newCount,
-                completed: isCompleted
-              } 
-            : s
-        )
-      };
-      setGameState(newGameState);
-      saveGameState(newGameState);
-    }
-  };
 
   const handleZoom = (delta: number) => {
     setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
@@ -311,65 +242,55 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   return (
     <div className="game-board bg-black min-h-screen text-white w-full">
       <div className="flex h-screen w-full">
-        {/* Lewy panel - Liczniki kluczy */}
-        <div className="w-96 bg-gray-900 border-r-2 border-gray-700 p-6">
-          {/* HUD */}
-          <div className="mb-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
-                <div className="text-yellow-400 text-2xl">💰</div>
-                <div className="text-white font-bold text-lg">0</div>
-              </div>
-              <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
-                <div className="text-yellow-400 text-2xl">🔑</div>
-                <div className="text-white font-bold text-lg">{gameState.keys}</div>
-              </div>
-            </div>
-            <div className="text-sm text-gray-300">
-              Gracz: <span className="font-bold">{gameState.playerName}</span>
-            </div>
-            <div className="text-sm text-gray-300">
-              Odblokowane: {gameState.unlockedTiles.length}
-            </div>
-          </div>
 
-          {/* Liczniki kluczy */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold mb-4 text-yellow-400">Źródła kluczy</h3>
-            {gameState.keySources.map((source) => (
-              <div
-                key={source.id}
-                className={`p-3 rounded border-2 ${
-                  source.completed 
-                    ? 'bg-green-800 border-green-600' 
-                    : 'bg-gray-800 border-gray-600'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">{source.icon}</span>
-                  <div className="font-medium text-sm">{source.name}</div>
-                </div>
-                <div className="text-xs text-gray-300 mb-2">{source.description}</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm">
-                    <span className="text-yellow-400">{source.currentCount}</span>
-                    <span className="text-gray-400">/{source.requiredCount}</span>
-                  </div>
-                  {!source.completed && (
-                    <button
-                      onClick={() => handleKeySourceIncrement(source.id)}
-                      className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-500 border border-blue-500"
-                    >
-                      +1
-                    </button>
-                  )}
-                </div>
-                {source.completed && (
-                  <div className="text-xs text-green-400 mt-1">✅ Ukończone!</div>
-                )}
-              </div>
-            ))}
+        {/* Licznik kluczy w lewym górnym rogu */}
+        <div className="absolute top-4 left-4 z-10">
+          <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
+            <img 
+              src="https://runescape.wiki/images/thumb/A_key_detail.png/100px-A_key_detail.png?d5cf4" 
+              alt="Key" 
+              className="w-6 h-6 mb-1"
+            />
+            <div className="text-white font-bold text-lg">{gameState.keys}</div>
           </div>
+        </div>
+
+        {/* Skills panel */}
+        <div className="absolute left-4 top-20 z-10">
+          <SkillsPanel playerStats={gameState.playerStats} />
+        </div>
+
+        {/* Przyciski na lewej krawędzi */}
+        <div className="absolute left-4 top-80 z-10 flex flex-col gap-2">
+          {/* Daily */}
+          <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
+            <img 
+              src="https://runescape.wiki/images/Scroll_%28Barbarian_Assault%29_detail.png?24779" 
+              alt="Daily" 
+              className="w-6 h-6 mb-1"
+            />
+            <div className="text-white font-bold text-sm">Daily</div>
+          </button>
+
+          {/* Slayer */}
+          <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
+            <img 
+              src="https://runescape.wiki/images/thumb/Slayer_detail.png/100px-Slayer_detail.png?0f0af" 
+              alt="Slayer" 
+              className="w-6 h-6 mb-1"
+            />
+            <div className="text-white font-bold text-sm">Slayer</div>
+          </button>
+
+          {/* Bosses */}
+          <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
+            <img 
+              src="https://runescape.wiki/images/thumb/Nex.png/200px-Nex.png?67c8a" 
+              alt="Bosses" 
+              className="w-6 h-6 mb-1"
+            />
+            <div className="text-white font-bold text-sm">Bosses</div>
+          </button>
         </div>
 
         {/* Główna plansza */}

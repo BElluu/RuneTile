@@ -1,8 +1,34 @@
 import { serve } from "bun";
 import index from "./index.html";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 const server = serve({
   routes: {
+    // Serve static assets
+    "/src/assets/*": async (req) => {
+      const url = new URL(req.url);
+      const filePath = join(process.cwd(), url.pathname);
+      try {
+        const file = await readFile(filePath);
+        const ext = filePath.split('.').pop()?.toLowerCase();
+        const contentType = ext === 'png' ? 'image/png' : 
+                          ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 
+                          ext === 'gif' ? 'image/gif' : 
+                          ext === 'svg' ? 'image/svg+xml' : 
+                          'application/octet-stream';
+        
+        return new Response(new Uint8Array(file), {
+          headers: {
+            'Content-Type': contentType,
+            'Cache-Control': 'public, max-age=31536000',
+          },
+        });
+      } catch (error) {
+        return new Response('File not found', { status: 404 });
+      }
+    },
+
     // Serve index.html for all unmatched routes.
     "/*": index,
 
