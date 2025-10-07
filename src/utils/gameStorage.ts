@@ -84,3 +84,24 @@ export function importGameState(jsonData: string): boolean {
     return false;
   }
 }
+
+// Zapisywanie stanu slayer masterów
+export function saveSlayerMasters(slayerMasters: any[]): void {
+  try {
+    localStorage.setItem('runeTile_slayerMasters', JSON.stringify(slayerMasters));
+    console.log('Stan slayer masterów zapisany');
+  } catch (error) {
+    console.error('Błąd podczas zapisywania stanu slayer masterów:', error);
+  }
+}
+
+// Ładowanie stanu slayer masterów
+export function loadSlayerMasters(): any[] | null {
+  try {
+    const data = localStorage.getItem('runeTile_slayerMasters');
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Błąd podczas ładowania stanu slayer masterów:', error);
+    return null;
+  }
+}

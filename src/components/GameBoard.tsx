@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState, Tile, TileState, Task, TaskCategory } from '@/types/game';
-import { loadGameState, saveGameState, updatePlayerStats } from '@/utils/gameStorage';
+import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters } from '@/utils/gameStorage';
 import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile } from '@/utils/gameLogic';
 import { SkillsPanel } from './SkillsPanel';
+import { SlayerMastersPanel } from './SlayerMastersPanel';
 
 interface GameBoardProps {
   playerName: string;
@@ -19,6 +20,18 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [error, setError] = useState<string | null>(null);
   const [showSkillsModal, setShowSkillsModal] = useState(false);
+  const [showSlayerModal, setShowSlayerModal] = useState(false);
+  const [slayerMasters, setSlayerMasters] = useState([
+    { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Mazchna', image: '/src/assets/slayer_masters/Mazchna_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Vannaka', image: '/src/assets/slayer_masters/Vannaka_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Chaeldar', image: '/src/assets/slayer_masters/Chaeldar_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Duradel', image: '/src/assets/slayer_masters/Duradel_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Nieve', image: '/src/assets/slayer_masters/Nieve_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Konar', image: '/src/assets/slayer_masters/Konar_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Krystilia', image: '/src/assets/slayer_masters/Krystilia_head.png', tasksCompleted: 0, requiredTasks: 5 },
+  ]);
 
   // Załaduj stan gry przy starcie tylko jeśli gracz jest już zapisany
   useEffect(() => {
@@ -26,6 +39,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     if (savedGame && savedGame.playerName === playerName.toLowerCase()) {
       // Automatycznie załaduj zapisanego gracza
       loadGame();
+    }
+    
+    // Załaduj stan slayer masterów
+    const savedSlayerMasters = loadSlayerMasters();
+    if (savedSlayerMasters) {
+      setSlayerMasters(savedSlayerMasters);
     }
   }, []);
 
@@ -125,6 +144,44 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     handleZoom(delta);
+  };
+
+  const handleSlayerTaskComplete = (masterName: string) => {
+    if (!gameState) return;
+    
+    setSlayerMasters(prev => {
+      const updated = prev.map(master => {
+        if (master.name === masterName) {
+          const newCount = master.tasksCompleted + 1;
+          const isCompleted = newCount >= master.requiredTasks;
+          
+          if (isCompleted) {
+            // Reset licznika i dodaj klucz
+            const newGameState = {
+              ...gameState,
+              keys: gameState.keys + 1
+            };
+            setGameState(newGameState);
+            saveGameState(newGameState);
+            
+            return {
+              ...master,
+              tasksCompleted: 0 // Reset do 0
+            };
+          } else {
+            return {
+              ...master,
+              tasksCompleted: newCount
+            };
+          }
+        }
+        return master;
+      });
+      
+      // Zapisz stan slayer masterów po każdej zmianie
+      saveSlayerMasters(updated);
+      return updated;
+    });
   };
 
   // Centrowanie na ostatnim odblokowanym kafelku
@@ -282,7 +339,10 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           </button>
 
           {/* Slayer */}
-          <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
+          <button 
+            onClick={() => setShowSlayerModal(!showSlayerModal)}
+            className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700"
+          >
             <img 
               src="https://runescape.wiki/images/thumb/Slayer_detail.png/100px-Slayer_detail.png?0f0af" 
               alt="Slayer" 
@@ -410,6 +470,27 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
               </button>
             </div>
             <SkillsPanel playerStats={gameState.playerStats} />
+          </div>
+        </div>
+      )}
+
+      {/* Slayer Masters Popup */}
+      {showSlayerModal && (
+        <div className="absolute top-32 left-32 z-20">
+          <div className="bg-gray-800 p-4 rounded border-2 border-gray-600 max-w-2xl">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-bold text-white">Slayer Masters</h3>
+              <button
+                onClick={() => setShowSlayerModal(false)}
+                className="text-white hover:text-gray-300 text-lg"
+              >
+                ×
+              </button>
+            </div>
+            <SlayerMastersPanel 
+              slayerMasters={slayerMasters} 
+              onTaskComplete={handleSlayerTaskComplete}
+            />
           </div>
         </div>
       )}
