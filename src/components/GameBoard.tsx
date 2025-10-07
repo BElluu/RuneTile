@@ -270,7 +270,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
 
         {/* Przyciski na lewej krawędzi */}
-        <div className="absolute left-4 top-20 z-10 flex flex-col gap-2">
+        <div className="absolute left-4 top-32 z-10 flex flex-col gap-2">
           {/* Daily */}
           <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
             <img 
