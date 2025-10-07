@@ -80,12 +80,44 @@ export enum TaskDifficulty {
 }
 
 export enum TaskCategory {
-  SLAYER = 'slayer',
-  DUNGEON = 'dungeon',
+  SKILL = 'skill',
+  QUEST = 'quest', 
   BOSS = 'boss',
-  COLLECTION_LOG = 'collection_log',
-  QUEST = 'quest',
-  SKILLING = 'skilling'
+  DROP = 'drop',
+  OTHER = 'other'
+}
+
+export interface GeneratedTask {
+  id: string;
+  title: string;
+  description: string;
+  category: TaskCategory;
+  difficulty: TaskDifficulty;
+  requirements: TaskRequirement[];
+  rewards: TaskReward[];
+}
+
+export interface TaskRequirement {
+  type: 'skill' | 'quest' | 'boss' | 'drop' | 'item';
+  target: string;
+  amount?: number;
+  currentLevel?: number;
+  requiredLevel?: number;
+}
+
+export interface TaskReward {
+  type: 'keys' | 'experience' | 'gold';
+  amount: number;
+  description: string;
+}
+
+export interface QuestData {
+  title: string;
+  status: string;
+  difficulty: number;
+  members: boolean;
+  questPoints: number;
+  userEligible: boolean;
 }
 
 export interface KeySource {
@@ -108,6 +140,7 @@ export interface GameState {
   completedTiles: string[];
   visibleTiles: string[];
   keySources: KeySource[];
+  tileTasks: Record<string, GeneratedTask>; // tileId -> task
   lastUpdated: number;
 }
 

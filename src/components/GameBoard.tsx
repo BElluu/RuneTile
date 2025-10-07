@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState, Tile, TileState, Task, TaskCategory } from '@/types/game';
 import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters } from '@/utils/gameStorage';
-import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile } from '@/utils/gameLogic';
+import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile, generateInitialGameState } from '@/utils/gameLogic';
+import { generateTaskForTile } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
 
@@ -75,16 +76,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
         if (response.ok) {
           const playerStats = await response.json();
-          const newGameState = {
-            playerName: playerName.toLowerCase(),
-            playerStats,
-            keys: 1,
-            unlockedTiles: [],
-            completedTiles: [],
-            visibleTiles: ['0,0'],
-            keySources: [],
-            lastUpdated: Date.now()
-          };
+          const newGameState = generateInitialGameState(playerName.toLowerCase(), playerStats);
           saveGameState(newGameState);
           setGameState(newGameState);
           // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
@@ -101,12 +93,20 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     }
   };
 
-  const handleTileClick = (tileId: string) => {
+  const handleTileClick = async (tileId: string) => {
     if (!gameState) return;
     
     if (canUnlockTile(tileId, gameState)) {
       try {
         const newGameState = unlockTile(tileId, gameState);
+        
+        // Generuj zadanie dla nowego kafelka
+        const task = await generateTaskForTile(tileId, gameState.playerStats, gameState.playerName);
+        newGameState.tileTasks = {
+          ...newGameState.tileTasks,
+          [tileId]: task
+        };
+        
         setGameState(newGameState);
         saveGameState(newGameState);
       } catch (error: unknown) {
@@ -407,52 +407,69 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 transformOrigin: 'center'
               }}
             >
-              {generateVisibleTiles(gameState).map(({ x, y }) => {
-                const tileId = `${x},${y}`;
-                const isUnlocked = gameState.unlockedTiles.includes(tileId);
-                const canUnlock = canUnlockTile(tileId, gameState);
-                
-                console.log('Rendering tile:', tileId, 'unlocked:', isUnlocked, 'canUnlock:', canUnlock);
-                
-                return (
-                  <div
-                    key={tileId}
-                    className={`
-                      absolute w-20 h-20 border-2 cursor-pointer flex items-center justify-center text-2xl
-                      ${isUnlocked 
-                        ? 'bg-green-600 border-green-400' 
-                        : canUnlock 
-                          ? 'bg-blue-600 border-blue-400 hover:bg-blue-500' 
-                          : 'bg-gray-600 border-gray-400'
-                      }
-                    `}
-                    style={{
-                      left: `${x * 88}px`, // 88px = 80px (width) + 8px (gap)
-                      top: `${y * 88}px`,
-                      imageRendering: 'pixelated',
-                      fontFamily: 'monospace'
-                    }}
-                    onClick={() => handleTileClick(tileId)}
-                  >
-                    {isUnlocked ? '✅' : '🔒'}
-                  </div>
-                );
-              })}
+                      {generateVisibleTiles(gameState).map(({ x, y }) => {
+                        const tileId = `${x},${y}`;
+                        const isUnlocked = gameState.unlockedTiles.includes(tileId);
+                        const canUnlock = canUnlockTile(tileId, gameState);
+                        const task = gameState.tileTasks[tileId];
+                        
+                        console.log('Rendering tile:', tileId, 'unlocked:', isUnlocked, 'canUnlock:', canUnlock);
+                        
+                        return (
+                          <div
+                            key={tileId}
+                            className={`
+                              absolute w-20 h-20 border-2 cursor-pointer flex items-center justify-center text-2xl
+                              ${isUnlocked 
+                                ? 'bg-green-600 border-green-400' 
+                                : canUnlock 
+                                  ? 'bg-blue-600 border-blue-400 hover:bg-blue-500' 
+                                  : 'bg-gray-600 border-gray-400'
+                              }
+                            `}
+                            style={{
+                              left: `${x * 88}px`, // 88px = 80px (width) + 8px (gap)
+                              top: `${y * 88}px`,
+                              imageRendering: 'pixelated',
+                              fontFamily: 'monospace'
+                            }}
+                            onClick={() => handleTileClick(tileId)}
+                            title={task ? `${task.title}\n${task.description}` : undefined}
+                          >
+                            {isUnlocked ? '✅' : '🔒'}
+                          </div>
+                        );
+                      })}
             </div>
           </div>
 
-          {/* Szczegóły wybranego kafelka */}
-          {selectedTile && (
-            <div className="bg-gray-800 p-4 border-t-2 border-gray-700">
-              <h3 className="font-bold mb-2">Kafelek {selectedTile}</h3>
-              <div className="text-sm text-gray-300">
-                {canUnlockTile(selectedTile, gameState) 
-                  ? 'Możesz odblokować ten kafelek!' 
-                  : 'Ten kafelek nie może być odblokowany'
-                }
-              </div>
-            </div>
-          )}
+                  {/* Szczegóły wybranego kafelka */}
+                  {selectedTile && (
+                    <div className="bg-gray-800 p-4 border-t-2 border-gray-700">
+                      <h3 className="font-bold mb-2">Kafelek {selectedTile}</h3>
+                      {gameState.tileTasks[selectedTile] ? (
+                        <div className="text-sm text-gray-300">
+                          <div className="font-semibold text-white mb-1">
+                            {gameState.tileTasks[selectedTile].title}
+                          </div>
+                          <div className="mb-2">
+                            {gameState.tileTasks[selectedTile].description}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            Kategoria: {gameState.tileTasks[selectedTile].category} | 
+                            Trudność: {gameState.tileTasks[selectedTile].difficulty}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-300">
+                          {canUnlockTile(selectedTile, gameState) 
+                            ? 'Możesz odblokować ten kafelek!' 
+                            : 'Ten kafelek nie może być odblokowany'
+                          }
+                        </div>
+                      )}
+                    </div>
+                  )}
         </div>
       </div>
 

@@ -209,6 +209,25 @@ function getTileById(tileId: string): Tile | null {
 
 // Generowanie początkowego stanu gry
 export function generateInitialGameState(playerName: string, playerStats: PlayerStats): GameState {
+  // Generuj zadanie startowe dla kafelka (0,0)
+  const startTask = {
+    id: `start_0,0_${Date.now()}`,
+    title: 'Start Your Adventure',
+    description: 'Use your first key to start adventure',
+    category: 'other' as const,
+    difficulty: 'easy' as const,
+    requirements: [{
+      type: 'item' as const,
+      target: 'key',
+      amount: 1
+    }],
+    rewards: [{
+      type: 'keys' as const,
+      amount: 0,
+      description: 'Begin your journey'
+    }]
+  };
+
   return {
     playerName,
     playerStats,
@@ -217,6 +236,7 @@ export function generateInitialGameState(playerName: string, playerStats: Player
     completedTiles: [],
     visibleTiles: ['0,0'], // Tylko centralny kafelek widoczny
     keySources: generateKeySources(),
+    tileTasks: { '0,0': startTask }, // Zadanie startowe dla kafelka (0,0)
     lastUpdated: Date.now()
   };
 }
