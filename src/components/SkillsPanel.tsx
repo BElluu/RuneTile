@@ -33,20 +33,17 @@ export function SkillsPanel({ playerStats }: SkillsPanelProps) {
   ];
 
   return (
-    <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
-      <div className="text-white font-bold text-sm mb-2">Skills</div>
-      <div className="grid grid-cols-3 gap-1">
-        {skills.map((skill, index) => (
-          <div key={index} className="flex flex-col items-center p-1 bg-gray-700 rounded">
-            <img 
-              src={skill.icon} 
-              alt={skill.name} 
-              className="w-6 h-6 mb-1"
-            />
-            <div className="text-xs text-white">{skill.level}</div>
-          </div>
-        ))}
-      </div>
+    <div className="grid grid-cols-3 gap-1">
+      {skills.map((skill, index) => (
+        <div key={index} className="flex flex-col items-center p-1 bg-gray-700 rounded">
+          <img 
+            src={skill.icon} 
+            alt={skill.name} 
+            className="w-5 h-5 mb-1"
+          />
+          <div className="text-xs text-white">{skill.level}</div>
+        </div>
+      ))}
     </div>
   );
 }

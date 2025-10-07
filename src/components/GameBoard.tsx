@@ -18,6 +18,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [error, setError] = useState<string | null>(null);
+  const [showSkillsModal, setShowSkillsModal] = useState(false);
 
   // Załaduj stan gry przy starcie tylko jeśli gracz jest już zapisany
   useEffect(() => {
@@ -243,8 +244,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     <div className="game-board bg-black min-h-screen text-white w-full">
       <div className="flex h-screen w-full">
 
-        {/* Licznik kluczy w lewym górnym rogu */}
-        <div className="absolute top-4 left-4 z-10">
+        {/* Licznik kluczy i przycisk Stats w lewym górnym rogu */}
+        <div className="absolute top-4 left-4 z-10 flex gap-2">
           <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
             <img 
               src="https://runescape.wiki/images/thumb/A_key_detail.png/100px-A_key_detail.png?d5cf4" 
@@ -253,15 +254,23 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             />
             <div className="text-white font-bold text-lg">{gameState.keys}</div>
           </div>
+          <button
+            onClick={() => setShowSkillsModal(!showSkillsModal)}
+            className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700"
+            title="Skills"
+          >
+            <img 
+              src="/src/assets/Stats_icon.png" 
+              alt="Stats" 
+              className="w-6 h-6 mb-1"
+            />
+            <div className="text-white font-bold text-sm">Stats</div>
+          </button>
         </div>
 
-        {/* Skills panel */}
-        <div className="absolute left-4 top-20 z-10">
-          <SkillsPanel playerStats={gameState.playerStats} />
-        </div>
 
         {/* Przyciski na lewej krawędzi */}
-        <div className="absolute left-4 top-80 z-10 flex flex-col gap-2">
+        <div className="absolute left-4 top-20 z-10 flex flex-col gap-2">
           {/* Daily */}
           <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
             <img 
@@ -386,6 +395,24 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           )}
         </div>
       </div>
+
+      {/* Skills Popup */}
+      {showSkillsModal && (
+        <div className="absolute top-4 left-32 z-20">
+          <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-bold text-white">Skills</h3>
+              <button
+                onClick={() => setShowSkillsModal(false)}
+                className="text-white hover:text-gray-300 text-lg"
+              >
+                ×
+              </button>
+            </div>
+            <SkillsPanel playerStats={gameState.playerStats} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
