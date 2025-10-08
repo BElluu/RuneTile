@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import type { GameState, Tile, TileState, Task, TaskCategory } from '@/types/game';
+import type { GameState } from '@/types/game';
 import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters } from '@/utils/gameStorage';
-import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
+import { generateVisibleTiles, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
 import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
@@ -22,8 +22,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [error, setError] = useState<string | null>(null);
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showSlayerModal, setShowSlayerModal] = useState(false);
-  const [popupTile, setPopupTile] = useState<string | null>(null); // State for popup tile
-  const [hoverTile, setHoverTile] = useState<string | null>(null); // State for hover tile
+  const [popupTile, setPopupTile] = useState<string | null>(null);
+  const [hoverTile, setHoverTile] = useState<string | null>(null);
   const [slayerMasters, setSlayerMasters] = useState([
     { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: 5 },
     { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: 5 },
@@ -36,22 +36,18 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     { name: 'Krystilia', image: '/src/assets/slayer_masters/Krystilia_head.png', tasksCompleted: 0, requiredTasks: 5 },
   ]);
 
-  // Załaduj stan gry przy starcie tylko jeśli gracz jest już zapisany
   useEffect(() => {
     const savedGame = loadGameState();
     if (savedGame && savedGame.playerName === playerName.toLowerCase()) {
-      // Automatycznie załaduj zapisanego gracza
       loadGame();
     }
-    
-    // Załaduj stan slayer masterów
+
     const savedSlayerMasters = loadSlayerMasters();
     if (savedSlayerMasters) {
       setSlayerMasters(savedSlayerMasters);
     }
   }, []);
 
-  // Generuj zadania dla widocznych kafelków gdy stan gry się zmieni
   useEffect(() => {
     if (gameState) {
       generateTasksForVisibleTiles(gameState, gameState.playerName).then(updatedGameState => {
@@ -61,39 +57,33 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         }
       });
     }
-  }, [gameState?.visibleTiles?.join(',')]); // Użyj stringa zamiast tablicy
+  }, [gameState?.visibleTiles?.join(',')]);
 
   const loadGame = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Sprawdź czy istnieje zapisany stan gry
       const savedState = loadGameState();
       
       if (savedState && savedState.playerName === playerName.toLowerCase()) {
-        // Aktualizuj statystyki gracza używając proxy endpointu
         const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
         if (response.ok) {
           const freshStats = await response.json();
           updatePlayerStats(freshStats);
           setGameState({ ...savedState, playerStats: freshStats });
-          // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
           setTimeout(() => centerOnLastUnlockedTile(), 100);
         } else {
           console.error('Błąd podczas pobierania statystyk');
           setGameState(savedState);
-          // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
           setTimeout(() => centerOnLastUnlockedTile(), 100);
         }
       } else {
-        // Nowa gra - pobierz statystyki i stwórz nowy stan
         const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
         if (response.ok) {
           const playerStats = await response.json();
           const newGameState = await generateInitialGameState(playerName.toLowerCase(), playerStats);
           saveGameState(newGameState);
           setGameState(newGameState);
-          // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
           setTimeout(() => centerOnLastUnlockedTile(), 100);
         } else {
           throw new Error('Gracz nie został znaleziony w systemie OSRS. Sprawdź czy nazwa jest poprawna.');
@@ -115,16 +105,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     const canUnlock = canUnlockTile(tileId, gameState);
     
     if (isCompleted) {
-      // Kafelek już ukończony - pokaż szczegóły
       setSelectedTile(tileId);
     } else if (isUnlocked) {
-      // Kafelek odblokowany - pokaż popup do ukończenia
       setPopupTile(tileId);
     } else if (canUnlock) {
-      // Kafelek można odblokować - pokaż popup do odblokowania
       setPopupTile(tileId);
     } else {
-      // Kafelek zablokowany - pokaż szczegóły
       setSelectedTile(tileId);
     }
   };
@@ -138,7 +124,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       
       setGameState(newGameState);
       saveGameState(newGameState);
-      setPopupTile(null); // Zamknij popup
+      setPopupTile(null);
     } catch (error: unknown) {
       alert(error instanceof Error ? error.message : 'Nieznany błąd');
     }
@@ -147,7 +133,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const handleCompleteTile = (tileId: string) => {
     if (!gameState) return;
     
-    // Oblicz nagrodę golda na podstawie trudności zadania
     const task = gameState.tileTasks[tileId];
     let goldReward = 100; // Domyślna nagroda
     
@@ -174,12 +159,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     const newGameState = {
       ...gameState,
       completedTiles: [...gameState.completedTiles, tileId],
-      gold: gameState.gold + goldReward // Dodaj gold za ukończenie zadania
+      gold: gameState.gold + goldReward
     };
     
     setGameState(newGameState);
     saveGameState(newGameState);
-    setPopupTile(null); // Zamknij popup
+    setPopupTile(null);
   };
 
   const handleZoom = (delta: number) => {
@@ -220,7 +205,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           const isCompleted = newCount >= master.requiredTasks;
           
           if (isCompleted) {
-            // Reset licznika i dodaj klucz
             const newGameState = {
               ...gameState,
               keys: gameState.keys + 1
@@ -230,7 +214,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             
             return {
               ...master,
-              tasksCompleted: 0 // Reset do 0
+              tasksCompleted: 0
             };
           } else {
             return {
@@ -242,37 +226,30 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         return master;
       });
       
-      // Zapisz stan slayer masterów po każdej zmianie
       saveSlayerMasters(updated);
       return updated;
     });
   };
 
-  // Centrowanie na ostatnim odblokowanym kafelku
   const centerOnLastUnlockedTile = () => {
     if (!gameState || gameState.unlockedTiles.length === 0) {
-      // Jeśli brak odblokowanych kafelków, wycentruj na (0,0)
       setPan({ x: 0, y: 0 });
       return;
     }
 
-    // Znajdź ostatni odblokowany kafelek
     const lastUnlockedTile = gameState.unlockedTiles[gameState.unlockedTiles.length - 1];
     if (!lastUnlockedTile) return;
     
     const [x, y] = lastUnlockedTile.split(',').map(Number);
     if (x === undefined || y === undefined) return;
     
-    // Wycentruj na tym kafelku
-    // Kafelek ma rozmiar 88px (80px + 8px gap), więc centrum to x * 88 + 44
+    // Tile has size 88px (80px + 8px gap), so center is x * 88 + 44
     const tileCenterX = x * 88 + 44;
     const tileCenterY = y * 88 + 44;
     
-    // Wycentruj na środku ekranu (uwzględniając zoom)
     const screenCenterX = window.innerWidth / 2;
     const screenCenterY = window.innerHeight / 2;
     
-    // Oblicz offset potrzebny do wycentrowania
     const offsetX = screenCenterX - tileCenterX;
     const offsetY = screenCenterY - tileCenterY;
     
@@ -322,16 +299,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="bg-gray-900 p-8 rounded-lg border-2 border-gray-700 max-w-md w-full">
           <h1 className="text-3xl font-bold text-white text-center mb-6">RuneTile</h1>
-          <p className="text-gray-300 text-center mb-6">
-            Companion aplikacja dla RuneScape Old School
-          </p>
           
           <div className="space-y-4">
             <input
               type="text"
               value={playerName}
               onChange={(e) => onPlayerNameChange(e.target.value)}
-              placeholder="Wprowadź nazwę gracza"
+              placeholder="Enter your OSRS name"
               disabled={isLoading}
               className={`w-full px-4 py-2 bg-gray-800 text-white border rounded focus:outline-none ${
                 isLoading 
@@ -353,7 +327,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                   : ''
               } text-white`}
             >
-              {isLoading ? 'Sprawdzanie gracza...' : 'Rozpocznij grę'}
+              {isLoading ? 'Checking player...' : 'Start game'}
             </button>
           </div>
         </div>
@@ -364,12 +338,10 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   return (
     <div className="game-board bg-black min-h-screen text-white w-full">
       <div className="flex h-screen w-full">
-
-        {/* Licznik kluczy i przycisk Stats w lewym górnym rogu */}
         <div className="absolute top-4 left-4 z-10 flex gap-2">
           <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
             <img 
-              src="https://runescape.wiki/images/thumb/A_key_detail.png/100px-A_key_detail.png?d5cf4" 
+              src="/src/assets/key_icon.png" 
               alt="Key" 
               className="w-6 h-6 mb-1"
             />
@@ -398,12 +370,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         </div>
 
 
-        {/* Przyciski na lewej krawędzi */}
+        {/* Left panel */}
         <div className="absolute left-4 top-32 z-10 flex flex-col gap-2">
           {/* Daily */}
           <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
             <img 
-              src="https://runescape.wiki/images/Scroll_%28Barbarian_Assault%29_detail.png?24779" 
+              src="/src/assets/Daily_icon.png" 
               alt="Daily" 
               className="w-6 h-6 mb-1"
             />
@@ -416,7 +388,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700"
           >
             <img 
-              src="https://runescape.wiki/images/thumb/Slayer_detail.png/100px-Slayer_detail.png?0f0af" 
+              src="/src/assets/SlayerMasters_icon.png" 
               alt="Slayer" 
               className="w-6 h-6 mb-1"
             />
@@ -426,7 +398,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           {/* Bosses */}
           <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
             <img 
-              src="https://runescape.wiki/images/thumb/Nex.png/200px-Nex.png?67c8a" 
+              src="/src/assets/Bosses_icon.png" 
               alt="Bosses" 
               className="w-6 h-6 mb-1"
             />
@@ -434,9 +406,9 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           </button>
         </div>
 
-        {/* Główna plansza */}
+        {/* Main board */}
         <div className="flex-1 flex flex-col relative">
-          {/* Kontrolki zoom */}
+          {/* Zoom controls */}
           <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
             <button
               onClick={() => handleZoom(0.1)}
@@ -462,7 +434,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             </div>
           </div>
 
-          {/* Siatka kafelków z zoom i pan */}
+          {/* Grid of tiles with zoom and pan */}
           <div 
             className="flex-1 flex items-center justify-center p-8 w-full overflow-hidden"
             onMouseDown={handleMouseDown}
@@ -486,7 +458,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         const canUnlock = canUnlockTile(tileId, gameState);
                         const task = gameState.tileTasks[tileId];
                         
-                        // Określ stan kafelka
+                        // Determine tile state
                         let tileState: 'locked' | 'unlocked' | 'completed';
                         if (isCompleted) {
                           tileState = 'completed';
@@ -523,7 +495,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                             onMouseLeave={() => setHoverTile(null)}
                             title={task ? `${task.title}\n${task.description}` : undefined}
                           >
-                            {/* Tło kafelka w stylu RuneScape */}
+                            {/* Background */}
                             <div className={`
                               absolute inset-0 border-2 rounded-sm
                               ${tileState === 'completed' 
@@ -536,12 +508,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               }
                             `} />
                             
-                            {/* Wzór w stylu RuneScape */}
+                            {/* Pattern */}
                             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent rounded-sm" />
                             
-                            {/* Ramka wewnętrzna */}
+                            {/* Inner frame */}
                             <div className="absolute inset-1 border border-black/20 rounded-sm" />
-                            {/* Ikona typu zadania */}
+                            {/* Task icon */}
                             {task && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <img 
@@ -557,28 +529,28 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               </div>
                             )}
                             
-                            {/* Ikona kłódki dla zablokowanych */}
+                            {/* Lock icon */}
                             {tileState === 'locked' && (
                               <div className="absolute top-1 right-1 w-4 h-4 bg-yellow-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
                                 🔒
                               </div>
                             )}
                             
-                            {/* Ikona zielonego ptaszka dla ukończonych */}
+                            {/* Green bird icon */}
                             {tileState === 'completed' && (
                               <div className="absolute top-1 right-1 w-4 h-4 bg-green-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
                                 ✓
                               </div>
                             )}
                             
-                            {/* Ikona dla odblokowanych */}
+                            {/* Unlocked icon */}
                             {tileState === 'unlocked' && (
                               <div className="absolute top-1 right-1 w-4 h-4 bg-blue-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
                                 ⚡
                               </div>
                             )}
                             
-                            {/* Efekt hover */}
+                            {/* Hover effect */}
                             {tileState !== 'completed' && (
                               <div className="absolute inset-0 bg-white/5 opacity-0 hover:opacity-100 transition-opacity rounded-sm" />
                             )}
@@ -588,10 +560,10 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             </div>
           </div>
 
-                  {/* Szczegóły wybranego kafelka */}
+                  {/* Details of selected tile */}
                   {selectedTile && (
                     <div className="bg-gray-800 p-4 border-t-2 border-gray-700">
-                      <h3 className="font-bold mb-2">Kafelek {selectedTile}</h3>
+                      <h3 className="font-bold mb-2">Tile {selectedTile}</h3>
                       <div className="text-sm text-gray-300">
                         {gameState.tileTasks[selectedTile] ? (
                           <div>
@@ -602,15 +574,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               {gameState.tileTasks[selectedTile].description}
                             </div>
                             <div className="text-xs text-gray-400">
-                              Kategoria: {gameState.tileTasks[selectedTile].category} | 
-                              Trudność: {gameState.tileTasks[selectedTile].difficulty}
+                              Category: {gameState.tileTasks[selectedTile].category} | 
+                              Difficulty: {gameState.tileTasks[selectedTile].difficulty}
                             </div>
                           </div>
                         ) : (
                           <div>
                             {canUnlockTile(selectedTile, gameState) 
-                              ? 'Możesz odblokować ten kafelek!' 
-                              : 'Ten kafelek nie może być odblokowany'
+                              ? 'You can unlock this tile!' 
+                              : 'This tile cannot be unlocked'
                             }
                           </div>
                         )}
@@ -659,12 +631,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 </div>
               )}
 
-              {/* Małe popupy dla kafelków */}
+              {/* Small popups for tiles */}
               {popupTile && gameState && (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
                   <div className="bg-gray-900 p-4 rounded border-2 border-gray-600 shadow-lg">
                     <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-lg font-bold text-white">Kafelek {popupTile}</h3>
+                      <h3 className="text-lg font-bold text-white">Tile {popupTile}</h3>
                       <button
                         onClick={() => setPopupTile(null)}
                         className="text-white hover:text-gray-300 text-lg"
@@ -681,20 +653,20 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         return (
                           <div className="text-sm text-gray-300">
                             <div className="font-semibold text-blue-400 mb-2">
-                              ⚡ Zadanie odblokowane
+                              ⚡ Task unlocked
                             </div>
                             <div className="mb-2">
                               {task?.title} - {task?.description}
                             </div>
                             <div className="text-xs text-gray-400 mb-3">
-                              Kategoria: {task?.category} | 
-                              Trudność: {task?.difficulty}
+                              Category: {task?.category} | 
+                              Difficulty: {task?.difficulty}
                             </div>
                             <button
                               onClick={() => handleCompleteTile(popupTile)}
                               className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 border border-green-500"
                             >
-                              Ukończ zadanie (+gold)
+                              Complete task (+gold)
                             </button>
                           </div>
                         );
@@ -702,21 +674,21 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         return (
                           <div className="text-sm text-gray-300">
                             <div className="font-semibold text-yellow-400 mb-2">
-                              🔒 Kafelek zablokowany
+                              🔒 Tile locked
                             </div>
                             <div className="mb-2">
                               {task?.title} - {task?.description}
                             </div>
                             <div className="text-xs text-gray-400 mb-3">
-                              Kategoria: {task?.category} | 
-                              Trudność: {task?.difficulty}
+                              Category: {task?.category} | 
+                              Difficulty: {task?.difficulty}
                             </div>
                             <button
                               onClick={() => handleUnlockTile(popupTile)}
                               className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-500"
                               disabled={gameState.keys < 1}
                             >
-                              Odblokuj za 1 klucz
+                              Unlock with 1 key
                             </button>
                           </div>
                         );
@@ -740,7 +712,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         return (
                           <div className="text-sm text-gray-300">
                             <div className="font-semibold text-green-400 mb-1">
-                              ✅ Ukończone
+                              ✅ Completed
                             </div>
                             <div className="text-xs">
                               {task?.title}
@@ -751,7 +723,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         return (
                           <div className="text-sm text-gray-300">
                             <div className="font-semibold text-blue-400 mb-1">
-                              ⚡ Kliknij aby ukończyć
+                              ⚡ Click to complete
                             </div>
                             <div className="text-xs">
                               {task?.title}
@@ -762,7 +734,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         return (
                           <div className="text-sm text-gray-300">
                             <div className="font-semibold text-yellow-400 mb-1">
-                              🔒 Kliknij aby odblokować
+                              🔒 Click to unlock
                             </div>
                             <div className="text-xs">
                               {task?.title}
@@ -773,10 +745,10 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         return (
                           <div className="text-sm text-gray-300">
                             <div className="font-semibold text-gray-400 mb-1">
-                              🔒 Zablokowany
+                              🔒 Locked
                             </div>
                             <div className="text-xs">
-                              {task?.title || 'Nieznane zadanie'}
+                              {task?.title || 'Unknown task'}
                             </div>
                           </div>
                         );
