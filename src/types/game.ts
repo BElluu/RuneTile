@@ -39,9 +39,9 @@ export interface Tile {
 }
 
 export enum TileState {
-  LOCKED = 'locked',
-  UNLOCKED = 'unlocked', 
-  COMPLETED = 'completed'
+  LOCKED = 'locked',      // Zablokowany - wymaga klucza
+  UNLOCKED = 'unlocked',   // Odblokowany - można wykonać zadanie
+  COMPLETED = 'completed'  // Ukończony - zadanie wykonane
 }
 
 export interface Task {
@@ -136,6 +136,7 @@ export interface GameState {
   playerName: string;
   playerStats: PlayerStats;
   keys: number;
+  gold: number;
   unlockedTiles: string[];
   completedTiles: string[];
   visibleTiles: string[];

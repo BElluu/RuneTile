@@ -1,4 +1,6 @@
-import { Tile, TileState, GameState, TilePosition, PlayerStats, Task, SkillRequirement } from '@/types/game';
+import type { Tile, TileState, GameState, TilePosition, PlayerStats, Task, SkillRequirement } from '@/types/game';
+import { TaskCategory, TaskDifficulty, RewardType } from '@/types/game';
+import { generateTaskForTile } from './taskGenerator';
 
 // Generowanie nieskończonej siatki kafelków - tylko widoczne kafelki
 export function generateVisibleTiles(gameState: GameState): TilePosition[] {
@@ -13,14 +15,20 @@ export function generateVisibleTiles(gameState: GameState): TilePosition[] {
   
   // Dodaj wszystkie odblokowane kafelki
   for (const tileId of gameState.unlockedTiles) {
-    const [x, y] = tileId.split(',').map(Number);
+    const parts = tileId.split(',');
+    const x = parseInt(parts[0] || '0', 10);
+    const y = parseInt(parts[1] || '0', 10);
+    if (isNaN(x) || isNaN(y)) continue;
     visiblePositions.push({ x, y });
     processed.add(tileId);
   }
   
   // Dodaj sąsiadów odblokowanych kafelków
   for (const tileId of gameState.unlockedTiles) {
-    const [x, y] = tileId.split(',').map(Number);
+    const parts = tileId.split(',');
+    const x = parseInt(parts[0] || '0', 10);
+    const y = parseInt(parts[1] || '0', 10);
+    if (isNaN(x) || isNaN(y)) continue;
     const neighbors = getNeighborPositions(x, y);
     
     for (const neighbor of neighbors) {
@@ -84,9 +92,9 @@ export function generateTasksForPlayer(playerStats: PlayerStats): Task[] {
       title: 'Mining Levels 1-10',
       description: 'Osiągnij poziom 10 w Mining',
       requirements: [{ skill: 'mining', level: 1 }],
-      rewards: [{ type: 'keys' as const, amount: 1, description: '1 klucz' }],
-      difficulty: 'easy' as const,
-      category: 'skilling' as const
+      rewards: [{ type: RewardType.KEYS, amount: 1, description: '1 klucz' }],
+      difficulty: TaskDifficulty.EASY,
+      category: TaskCategory.SKILL
     });
   }
   
@@ -96,9 +104,9 @@ export function generateTasksForPlayer(playerStats: PlayerStats): Task[] {
       title: 'Mining Levels 10-30',
       description: 'Osiągnij poziom 30 w Mining',
       requirements: [{ skill: 'mining', level: 10 }],
-      rewards: [{ type: 'keys' as const, amount: 2, description: '2 klucze' }],
-      difficulty: 'medium' as const,
-      category: 'skilling' as const
+      rewards: [{ type: RewardType.KEYS, amount: 2, description: '2 klucze' }],
+      difficulty: TaskDifficulty.MEDIUM,
+      category: TaskCategory.SKILL
     });
   }
   
@@ -108,9 +116,9 @@ export function generateTasksForPlayer(playerStats: PlayerStats): Task[] {
       title: 'Slayer Master Task',
       description: 'Wykonaj zadanie od Slayer Mastera (poziom 50+)',
       requirements: [{ skill: 'slayer', level: 50 }],
-      rewards: [{ type: 'keys' as const, amount: 3, description: '3 klucze' }],
-      difficulty: 'hard' as const,
-      category: 'slayer' as const
+      rewards: [{ type: RewardType.KEYS, amount: 3, description: '3 klucze' }],
+      difficulty: TaskDifficulty.HARD,
+      category: TaskCategory.BOSS
     });
   }
   
@@ -148,7 +156,13 @@ export function unlockTile(tileId: string, gameState: GameState): GameState {
   }
   
   // Po odblokowaniu kafelka, dodaj jego sąsiadów do widocznych
-  const [x, y] = tileId.split(',').map(Number);
+  const parts = tileId.split(',');
+  const x = parseInt(parts[0] || '0', 10);
+  const y = parseInt(parts[1] || '0', 10);
+  if (isNaN(x) || isNaN(y)) {
+    throw new Error('Nieprawidłowy format ID kafelka');
+  }
+  
   const newVisibleTiles = new Set(gameState.visibleTiles);
   
   // Dodaj sąsiadów odblokowanego kafelka (góra, dół, lewo, prawo)
@@ -208,21 +222,21 @@ function getTileById(tileId: string): Tile | null {
 }
 
 // Generowanie początkowego stanu gry
-export function generateInitialGameState(playerName: string, playerStats: PlayerStats): GameState {
+export async function generateInitialGameState(playerName: string, playerStats: PlayerStats): Promise<GameState> {
   // Generuj zadanie startowe dla kafelka (0,0)
   const startTask = {
-    id: `start_0,0_${Date.now()}`,
+    id: `start_0,0`,
     title: 'Start Your Adventure',
     description: 'Use your first key to start adventure',
-    category: 'other' as const,
-    difficulty: 'easy' as const,
+    category: TaskCategory.OTHER,
+    difficulty: TaskDifficulty.EASY,
     requirements: [{
       type: 'item' as const,
       target: 'key',
       amount: 1
     }],
     rewards: [{
-      type: 'keys' as const,
+      type: RewardType.KEYS,
       amount: 0,
       description: 'Begin your journey'
     }]
@@ -232,6 +246,7 @@ export function generateInitialGameState(playerName: string, playerStats: Player
     playerName,
     playerStats,
     keys: 1, // Jeden klucz na start
+    gold: 0, // Brak golda na start
     unlockedTiles: [], // Brak odblokowanych kafelków na start
     completedTiles: [],
     visibleTiles: ['0,0'], // Tylko centralny kafelek widoczny
@@ -248,7 +263,7 @@ function generateKeySources() {
       id: 'slayer_master',
       name: 'Slayer Tasks',
       description: 'Wykonaj zadania od Slayer Mastera',
-      category: 'slayer' as const,
+      category: TaskCategory.BOSS,
       keysRewarded: 1,
       completed: false,
       currentCount: 0,
@@ -259,7 +274,7 @@ function generateKeySources() {
       id: 'dungeon_clear',
       name: 'Dungeons',
       description: 'Wykonaj dungeons',
-      category: 'dungeon' as const,
+      category: TaskCategory.OTHER,
       keysRewarded: 2,
       completed: false,
       currentCount: 0,
@@ -270,7 +285,7 @@ function generateKeySources() {
       id: 'boss_kill',
       name: 'Barrows',
       description: 'Zabij bossów Barrows',
-      category: 'boss' as const,
+      category: TaskCategory.BOSS,
       keysRewarded: 3,
       completed: false,
       currentCount: 0,
@@ -281,7 +296,7 @@ function generateKeySources() {
       id: 'collection_log',
       name: 'Collection Log',
       description: 'Wypełnij wpisy w Collection Log',
-      category: 'collection_log' as const,
+      category: TaskCategory.OTHER,
       keysRewarded: 1,
       completed: false,
       currentCount: 0,
@@ -289,4 +304,25 @@ function generateKeySources() {
       icon: '📋'
     }
   ];
+}
+
+// Generowanie zadań dla widocznych kafelków
+export async function generateTasksForVisibleTiles(gameState: GameState, playerName: string): Promise<GameState> {
+  const visibleTiles = generateVisibleTiles(gameState);
+  const newTileTasks = { ...gameState.tileTasks };
+  
+  for (const { x, y } of visibleTiles) {
+    const tileId = `${x},${y}`;
+    
+    // Jeśli kafelek nie ma jeszcze zadania, wygeneruj je
+    if (!newTileTasks[tileId]) {
+      const task = await generateTaskForTile(tileId, gameState.playerStats, playerName);
+      newTileTasks[tileId] = task;
+    }
+  }
+  
+  return {
+    ...gameState,
+    tileTasks: newTileTasks
+  };
 }

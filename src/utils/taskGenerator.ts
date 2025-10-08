@@ -63,12 +63,31 @@ const GE_ITEMS = [
   'Raw Swordfish', 'Raw Shark', 'Raw Monkfish', 'Raw Anglerfish'
 ];
 
+// Funkcja do pobierania ikony dla typu zadania
+export function getTaskIcon(category: TaskCategory): string {
+  switch (category) {
+    case TaskCategory.SKILL:
+      return '/src/assets/skills/Attack_icon.png'; // Używamy ikony skilla jako przykład
+    case TaskCategory.QUEST:
+      return '/src/assets/skills/Prayer_icon.png'; // Używamy ikony quest jako przykład
+    case TaskCategory.BOSS:
+      return '/src/assets/skills/Slayer_icon.png'; // Używamy ikony slayer jako przykład
+    case TaskCategory.DROP:
+      return '/src/assets/skills/Thieving_icon.png'; // Używamy ikony thieving jako przykład
+    case TaskCategory.OTHER:
+      return '/src/assets/skills/Crafting_icon.png'; // Używamy ikony crafting jako przykład
+    default:
+      return '/src/assets/skills/Attack_icon.png';
+  }
+}
+
 export async function generateTaskForTile(tileId: string, playerStats: PlayerStats, playerName: string): Promise<GeneratedTask> {
   // Specjalne zadanie startowe dla kafelka (0,0)
   if (tileId === '0,0') {
     return generateStartTask(tileId);
   }
   
+  // Użyj losowego generatora - zadania mają być losowe za każdym razem
   const categories = Object.values(TaskCategory);
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];
   
@@ -88,18 +107,19 @@ export async function generateTaskForTile(tileId: string, playerStats: PlayerSta
   }
 }
 
+
 function generateSkillTask(tileId: string, playerStats: PlayerStats): GeneratedTask {
   const skill = SKILLS[Math.floor(Math.random() * SKILLS.length)];
   if (!skill) {
-    // Fallback jeśli coś pójdzie nie tak
-    return generateStartTask(tileId);
+    // Fallback - spróbuj inny skill
+    return generateSkillTask(tileId, playerStats);
   }
   
   const currentLevel = playerStats[skill];
   
-  // Nie generuj zadań dla skilli na poziomie 99
+  // Nie generuj zadań dla skilli na poziomie 99 - spróbuj inny skill
   if (currentLevel >= 99) {
-    return generateStartTask(tileId);
+    return generateSkillTask(tileId, playerStats);
   }
   
   let levelIncrease: number;
@@ -124,7 +144,7 @@ function generateSkillTask(tileId: string, playerStats: PlayerStats): GeneratedT
   const difficulty = getDifficultyFromLevelIncrease(levelIncrease);
   
   return {
-    id: `skill_${tileId}_${Date.now()}`,
+    id: `skill_${tileId}`,
     title: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Training`,
     description: `Train ${skill} from level ${currentLevel} to level ${targetLevel}`,
     category: TaskCategory.SKILL,
@@ -148,7 +168,8 @@ async function generateQuestTask(tileId: string, playerName: string): Promise<Ge
     // Pobierz dane questów z API
     const response = await fetch(`/api/quests/${encodeURIComponent(playerName)}`);
     if (!response.ok) {
-      return generateStartTask(tileId);
+      // Fallback - generuj boss task zamiast start task
+      return generateBossTask(tileId);
     }
     
     const quests: QuestData[] = await response.json();
@@ -159,18 +180,20 @@ async function generateQuestTask(tileId: string, playerName: string): Promise<Ge
     );
     
     if (availableQuests.length === 0) {
-      return generateStartTask(tileId);
+      // Fallback - generuj boss task zamiast start task
+      return generateBossTask(tileId);
     }
     
     // Wybierz losowy quest z dostępnych
     const randomQuest = availableQuests[Math.floor(Math.random() * availableQuests.length)];
     
     if (!randomQuest) {
-      return generateStartTask(tileId);
+      // Fallback - generuj boss task zamiast start task
+      return generateBossTask(tileId);
     }
     
     return {
-      id: `quest_${tileId}_${Date.now()}`,
+      id: `quest_${tileId}`,
       title: `Quest: ${randomQuest.title}`,
       description: `Complete the quest: ${randomQuest.title}`,
       category: TaskCategory.QUEST,
@@ -187,20 +210,22 @@ async function generateQuestTask(tileId: string, playerName: string): Promise<Ge
     };
   } catch (error) {
     console.error('Error fetching quest data:', error);
-    return generateStartTask(tileId);
+    // Fallback - generuj boss task zamiast start task
+    return generateBossTask(tileId);
   }
 }
 
 function generateBossTask(tileId: string): GeneratedTask {
   const boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
   if (!boss) {
-    return generateStartTask(tileId);
+    // Fallback - spróbuj ponownie
+    return generateBossTask(tileId);
   }
   
   const killCount = Math.floor(Math.random() * 10) + 1; // 1-10 kills
   
   return {
-    id: `boss_${tileId}_${Date.now()}`,
+    id: `boss_${tileId}`,
     title: `Boss Kill: ${boss}`,
     description: `Kill ${boss} ${killCount} time${killCount > 1 ? 's' : ''}`,
     category: TaskCategory.BOSS,
@@ -221,11 +246,12 @@ function generateBossTask(tileId: string): GeneratedTask {
 function generateDropTask(tileId: string): GeneratedTask {
   const drop = DROPS[Math.floor(Math.random() * DROPS.length)];
   if (!drop) {
-    return generateStartTask(tileId);
+    // Fallback - spróbuj ponownie
+    return generateDropTask(tileId);
   }
   
   return {
-    id: `drop_${tileId}_${Date.now()}`,
+    id: `drop_${tileId}`,
     title: `Drop: ${drop}`,
     description: `Obtain ${drop} as a drop from any monster`,
     category: TaskCategory.DROP,
@@ -245,13 +271,14 @@ function generateDropTask(tileId: string): GeneratedTask {
 function generateOtherTask(tileId: string): GeneratedTask {
   const item = GE_ITEMS[Math.floor(Math.random() * GE_ITEMS.length)];
   if (!item) {
-    return generateStartTask(tileId);
+    // Fallback - spróbuj ponownie
+    return generateOtherTask(tileId);
   }
   
   const amount = Math.floor(Math.random() * 50) + 10; // 10-60 items
   
   return {
-    id: `other_${tileId}_${Date.now()}`,
+    id: `other_${tileId}`,
     title: `Grand Exchange: ${item}`,
     description: `Buy ${amount} ${item} from the Grand Exchange`,
     category: TaskCategory.OTHER,
@@ -271,7 +298,7 @@ function generateOtherTask(tileId: string): GeneratedTask {
 
 function generateStartTask(tileId: string): GeneratedTask {
   return {
-    id: `start_${tileId}_${Date.now()}`,
+    id: `start_${tileId}`,
     title: 'Start Your Adventure',
     description: 'Use your first key to start adventure',
     category: TaskCategory.OTHER,
@@ -309,3 +336,4 @@ function getDifficultyFromQuestPoints(questPoints: number): TaskDifficulty {
   if (questPoints <= 10) return TaskDifficulty.HARD;
   return TaskDifficulty.ELITE;
 }
+

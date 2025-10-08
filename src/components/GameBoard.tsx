@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState, Tile, TileState, Task, TaskCategory } from '@/types/game';
 import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters } from '@/utils/gameStorage';
-import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile, generateInitialGameState } from '@/utils/gameLogic';
-import { generateTaskForTile } from '@/utils/taskGenerator';
+import { generateVisibleTiles, isTileVisible, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
+import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
 
@@ -22,6 +22,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [error, setError] = useState<string | null>(null);
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showSlayerModal, setShowSlayerModal] = useState(false);
+  const [popupTile, setPopupTile] = useState<string | null>(null); // State for popup tile
+  const [hoverTile, setHoverTile] = useState<string | null>(null); // State for hover tile
   const [slayerMasters, setSlayerMasters] = useState([
     { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: 5 },
     { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: 5 },
@@ -48,6 +50,18 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       setSlayerMasters(savedSlayerMasters);
     }
   }, []);
+
+  // Generuj zadania dla widocznych kafelków gdy stan gry się zmieni
+  useEffect(() => {
+    if (gameState) {
+      generateTasksForVisibleTiles(gameState, gameState.playerName).then(updatedGameState => {
+        if (JSON.stringify(updatedGameState.tileTasks) !== JSON.stringify(gameState.tileTasks)) {
+          setGameState(updatedGameState);
+          saveGameState(updatedGameState);
+        }
+      });
+    }
+  }, [gameState?.visibleTiles?.join(',')]); // Użyj stringa zamiast tablicy
 
   const loadGame = async () => {
     setIsLoading(true);
@@ -76,7 +90,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
         if (response.ok) {
           const playerStats = await response.json();
-          const newGameState = generateInitialGameState(playerName.toLowerCase(), playerStats);
+          const newGameState = await generateInitialGameState(playerName.toLowerCase(), playerStats);
           saveGameState(newGameState);
           setGameState(newGameState);
           // Wycentruj na ostatnim odblokowanym kafelku po załadowaniu
@@ -96,27 +110,77 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const handleTileClick = async (tileId: string) => {
     if (!gameState) return;
     
-    if (canUnlockTile(tileId, gameState)) {
-      try {
-        const newGameState = unlockTile(tileId, gameState);
-        
-        // Generuj zadanie dla nowego kafelka
-        const task = await generateTaskForTile(tileId, gameState.playerStats, gameState.playerName);
-        newGameState.tileTasks = {
-          ...newGameState.tileTasks,
-          [tileId]: task
-        };
-        
-        setGameState(newGameState);
-        saveGameState(newGameState);
-      } catch (error: unknown) {
-        alert(error instanceof Error ? error.message : 'Nieznany błąd');
-      }
+    const isUnlocked = gameState.unlockedTiles.includes(tileId);
+    const isCompleted = gameState.completedTiles.includes(tileId);
+    const canUnlock = canUnlockTile(tileId, gameState);
+    
+    if (isCompleted) {
+      // Kafelek już ukończony - pokaż szczegóły
+      setSelectedTile(tileId);
+    } else if (isUnlocked) {
+      // Kafelek odblokowany - pokaż popup do ukończenia
+      setPopupTile(tileId);
+    } else if (canUnlock) {
+      // Kafelek można odblokować - pokaż popup do odblokowania
+      setPopupTile(tileId);
     } else {
+      // Kafelek zablokowany - pokaż szczegóły
       setSelectedTile(tileId);
     }
   };
 
+
+  const handleUnlockTile = async (tileId: string) => {
+    if (!gameState) return;
+    
+    try {
+      const newGameState = unlockTile(tileId, gameState);
+      
+      setGameState(newGameState);
+      saveGameState(newGameState);
+      setPopupTile(null); // Zamknij popup
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Nieznany błąd');
+    }
+  };
+
+  const handleCompleteTile = (tileId: string) => {
+    if (!gameState) return;
+    
+    // Oblicz nagrodę golda na podstawie trudności zadania
+    const task = gameState.tileTasks[tileId];
+    let goldReward = 100; // Domyślna nagroda
+    
+    if (task) {
+      switch (task.difficulty) {
+        case 'easy':
+          goldReward = 50;
+          break;
+        case 'medium':
+          goldReward = 150;
+          break;
+        case 'hard':
+          goldReward = 300;
+          break;
+        case 'elite':
+          goldReward = 500;
+          break;
+        case 'master':
+          goldReward = 1000;
+          break;
+      }
+    }
+    
+    const newGameState = {
+      ...gameState,
+      completedTiles: [...gameState.completedTiles, tileId],
+      gold: gameState.gold + goldReward // Dodaj gold za ukończenie zadania
+    };
+    
+    setGameState(newGameState);
+    saveGameState(newGameState);
+    setPopupTile(null); // Zamknij popup
+  };
 
   const handleZoom = (delta: number) => {
     setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
@@ -311,6 +375,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             />
             <div className="text-white font-bold text-lg">{gameState.keys}</div>
           </div>
+          <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
+            <img 
+              src="/src/assets/gold_icon.png" 
+              alt="Gold" 
+              className="w-6 h-6 mb-1"
+            />
+            <div className="text-white font-bold text-lg">{gameState.gold.toLocaleString()}</div>
+          </div>
           <button
             onClick={() => setShowSkillsModal(!showSkillsModal)}
             className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700"
@@ -410,21 +482,34 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                       {generateVisibleTiles(gameState).map(({ x, y }) => {
                         const tileId = `${x},${y}`;
                         const isUnlocked = gameState.unlockedTiles.includes(tileId);
+                        const isCompleted = gameState.completedTiles.includes(tileId);
                         const canUnlock = canUnlockTile(tileId, gameState);
                         const task = gameState.tileTasks[tileId];
                         
-                        console.log('Rendering tile:', tileId, 'unlocked:', isUnlocked, 'canUnlock:', canUnlock);
+                        // Określ stan kafelka
+                        let tileState: 'locked' | 'unlocked' | 'completed';
+                        if (isCompleted) {
+                          tileState = 'completed';
+                        } else if (isUnlocked) {
+                          tileState = 'unlocked';
+                        } else {
+                          tileState = 'locked';
+                        }
+                        
+                        console.log('Rendering tile:', tileId, 'state:', tileState, 'canUnlock:', canUnlock);
                         
                         return (
                           <div
                             key={tileId}
                             className={`
-                              absolute w-20 h-20 border-2 cursor-pointer flex items-center justify-center text-2xl
-                              ${isUnlocked 
-                                ? 'bg-green-600 border-green-400' 
-                                : canUnlock 
-                                  ? 'bg-blue-600 border-blue-400 hover:bg-blue-500' 
-                                  : 'bg-gray-600 border-gray-400'
+                              absolute w-20 h-20 cursor-pointer
+                              ${tileState === 'completed' 
+                                ? 'opacity-60' 
+                                : tileState === 'unlocked'
+                                  ? 'hover:scale-105 transition-transform'
+                                  : canUnlock
+                                    ? 'hover:scale-105 transition-transform'
+                                    : 'opacity-50'
                               }
                             `}
                             style={{
@@ -434,9 +519,69 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               fontFamily: 'monospace'
                             }}
                             onClick={() => handleTileClick(tileId)}
+                            onMouseEnter={() => setHoverTile(tileId)}
+                            onMouseLeave={() => setHoverTile(null)}
                             title={task ? `${task.title}\n${task.description}` : undefined}
                           >
-                            {isUnlocked ? '✅' : '🔒'}
+                            {/* Tło kafelka w stylu RuneScape */}
+                            <div className={`
+                              absolute inset-0 border-2 rounded-sm
+                              ${tileState === 'completed' 
+                                ? 'bg-gray-800 border-gray-600' 
+                                : tileState === 'unlocked'
+                                  ? 'bg-green-800 border-green-600 shadow-lg shadow-green-500/20'
+                                  : canUnlock
+                                    ? 'bg-blue-800 border-blue-600 shadow-lg shadow-blue-500/20'
+                                    : 'bg-gray-800 border-gray-600'
+                              }
+                            `} />
+                            
+                            {/* Wzór w stylu RuneScape */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent rounded-sm" />
+                            
+                            {/* Ramka wewnętrzna */}
+                            <div className="absolute inset-1 border border-black/20 rounded-sm" />
+                            {/* Ikona typu zadania */}
+                            {task && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <img 
+                                  src={getTaskIcon(task.category)} 
+                                  alt={task.category}
+                                  className={`
+                                    w-10 h-10
+                                    ${tileState === 'locked' ? 'opacity-40' : 'opacity-100'}
+                                    ${tileState === 'completed' ? 'opacity-60' : ''}
+                                  `}
+                                  style={{ imageRendering: 'pixelated' }}
+                                />
+                              </div>
+                            )}
+                            
+                            {/* Ikona kłódki dla zablokowanych */}
+                            {tileState === 'locked' && (
+                              <div className="absolute top-1 right-1 w-4 h-4 bg-yellow-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
+                                🔒
+                              </div>
+                            )}
+                            
+                            {/* Ikona zielonego ptaszka dla ukończonych */}
+                            {tileState === 'completed' && (
+                              <div className="absolute top-1 right-1 w-4 h-4 bg-green-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
+                                ✓
+                              </div>
+                            )}
+                            
+                            {/* Ikona dla odblokowanych */}
+                            {tileState === 'unlocked' && (
+                              <div className="absolute top-1 right-1 w-4 h-4 bg-blue-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
+                                ⚡
+                              </div>
+                            )}
+                            
+                            {/* Efekt hover */}
+                            {tileState !== 'completed' && (
+                              <div className="absolute inset-0 bg-white/5 opacity-0 hover:opacity-100 transition-opacity rounded-sm" />
+                            )}
                           </div>
                         );
                       })}
@@ -447,27 +592,29 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                   {selectedTile && (
                     <div className="bg-gray-800 p-4 border-t-2 border-gray-700">
                       <h3 className="font-bold mb-2">Kafelek {selectedTile}</h3>
-                      {gameState.tileTasks[selectedTile] ? (
-                        <div className="text-sm text-gray-300">
-                          <div className="font-semibold text-white mb-1">
-                            {gameState.tileTasks[selectedTile].title}
+                      <div className="text-sm text-gray-300">
+                        {gameState.tileTasks[selectedTile] ? (
+                          <div>
+                            <div className="font-semibold text-white mb-1">
+                              {gameState.tileTasks[selectedTile].title}
+                            </div>
+                            <div className="mb-2">
+                              {gameState.tileTasks[selectedTile].description}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Kategoria: {gameState.tileTasks[selectedTile].category} | 
+                              Trudność: {gameState.tileTasks[selectedTile].difficulty}
+                            </div>
                           </div>
-                          <div className="mb-2">
-                            {gameState.tileTasks[selectedTile].description}
+                        ) : (
+                          <div>
+                            {canUnlockTile(selectedTile, gameState) 
+                              ? 'Możesz odblokować ten kafelek!' 
+                              : 'Ten kafelek nie może być odblokowany'
+                            }
                           </div>
-                          <div className="text-xs text-gray-400">
-                            Kategoria: {gameState.tileTasks[selectedTile].category} | 
-                            Trudność: {gameState.tileTasks[selectedTile].difficulty}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-sm text-gray-300">
-                          {canUnlockTile(selectedTile, gameState) 
-                            ? 'Możesz odblokować ten kafelek!' 
-                            : 'Ten kafelek nie może być odblokowany'
-                          }
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   )}
         </div>
@@ -491,26 +638,153 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         </div>
       )}
 
-      {/* Slayer Masters Popup */}
-      {showSlayerModal && (
-        <div className="absolute top-32 left-32 z-20">
-          <div className="bg-gray-800 p-4 rounded border-2 border-gray-600 max-w-2xl">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-bold text-white">Slayer Masters</h3>
-              <button
-                onClick={() => setShowSlayerModal(false)}
-                className="text-white hover:text-gray-300 text-lg"
-              >
-                ×
-              </button>
+              {/* Slayer Masters Popup */}
+              {showSlayerModal && (
+                <div className="absolute top-32 left-32 z-20">
+                  <div className="bg-gray-800 p-4 rounded border-2 border-gray-600 max-w-2xl">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-lg font-bold text-white">Slayer Masters</h3>
+                      <button
+                        onClick={() => setShowSlayerModal(false)}
+                        className="text-white hover:text-gray-300 text-lg"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <SlayerMastersPanel 
+                      slayerMasters={slayerMasters} 
+                      onTaskComplete={handleSlayerTaskComplete}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Małe popupy dla kafelków */}
+              {popupTile && gameState && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
+                  <div className="bg-gray-900 p-4 rounded border-2 border-gray-600 shadow-lg">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-lg font-bold text-white">Kafelek {popupTile}</h3>
+                      <button
+                        onClick={() => setPopupTile(null)}
+                        className="text-white hover:text-gray-300 text-lg"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    
+                    {(() => {
+                      const isUnlocked = gameState.unlockedTiles.includes(popupTile);
+                      const task = gameState.tileTasks[popupTile];
+                      
+                      if (isUnlocked) {
+                        return (
+                          <div className="text-sm text-gray-300">
+                            <div className="font-semibold text-blue-400 mb-2">
+                              ⚡ Zadanie odblokowane
+                            </div>
+                            <div className="mb-2">
+                              {task?.title} - {task?.description}
+                            </div>
+                            <div className="text-xs text-gray-400 mb-3">
+                              Kategoria: {task?.category} | 
+                              Trudność: {task?.difficulty}
+                            </div>
+                            <button
+                              onClick={() => handleCompleteTile(popupTile)}
+                              className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 border border-green-500"
+                            >
+                              Ukończ zadanie (+gold)
+                            </button>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="text-sm text-gray-300">
+                            <div className="font-semibold text-yellow-400 mb-2">
+                              🔒 Kafelek zablokowany
+                            </div>
+                            <div className="mb-2">
+                              {task?.title} - {task?.description}
+                            </div>
+                            <div className="text-xs text-gray-400 mb-3">
+                              Kategoria: {task?.category} | 
+                              Trudność: {task?.difficulty}
+                            </div>
+                            <button
+                              onClick={() => handleUnlockTile(popupTile)}
+                              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-500"
+                              disabled={gameState.keys < 1}
+                            >
+                              Odblokuj za 1 klucz
+                            </button>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {/* Hover hints */}
+              {hoverTile && gameState && !popupTile && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+                  <div className="bg-gray-900 p-3 rounded border-2 border-gray-600 shadow-lg max-w-xs">
+                    {(() => {
+                      const isUnlocked = gameState.unlockedTiles.includes(hoverTile);
+                      const isCompleted = gameState.completedTiles.includes(hoverTile);
+                      const canUnlock = canUnlockTile(hoverTile, gameState);
+                      const task = gameState.tileTasks[hoverTile];
+                      
+                      if (isCompleted) {
+                        return (
+                          <div className="text-sm text-gray-300">
+                            <div className="font-semibold text-green-400 mb-1">
+                              ✅ Ukończone
+                            </div>
+                            <div className="text-xs">
+                              {task?.title}
+                            </div>
+                          </div>
+                        );
+                      } else if (isUnlocked) {
+                        return (
+                          <div className="text-sm text-gray-300">
+                            <div className="font-semibold text-blue-400 mb-1">
+                              ⚡ Kliknij aby ukończyć
+                            </div>
+                            <div className="text-xs">
+                              {task?.title}
+                            </div>
+                          </div>
+                        );
+                      } else if (canUnlock) {
+                        return (
+                          <div className="text-sm text-gray-300">
+                            <div className="font-semibold text-yellow-400 mb-1">
+                              🔒 Kliknij aby odblokować
+                            </div>
+                            <div className="text-xs">
+                              {task?.title}
+                            </div>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="text-sm text-gray-300">
+                            <div className="font-semibold text-gray-400 mb-1">
+                              🔒 Zablokowany
+                            </div>
+                            <div className="text-xs">
+                              {task?.title || 'Nieznane zadanie'}
+                            </div>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                </div>
+              )}
             </div>
-            <SlayerMastersPanel 
-              slayerMasters={slayerMasters} 
-              onTaskComplete={handleSlayerTaskComplete}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+          );
+        }
