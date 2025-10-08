@@ -496,7 +496,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                           tileState = 'locked';
                         }
                         
-                        console.log('Rendering tile:', tileId, 'state:', tileState, 'canUnlock:', canUnlock);
+                        //console.log('Rendering tile:', tileId, 'state:', tileState, 'canUnlock:', canUnlock);
                         
                         return (
                           <div

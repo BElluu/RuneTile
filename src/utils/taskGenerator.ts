@@ -102,6 +102,8 @@ export async function generateTaskForTile(tileId: string, playerStats: PlayerSta
       return generateDropTask(tileId);
     case TaskCategory.OTHER:
       return generateOtherTask(tileId);
+    case TaskCategory.QUEST:
+      return await generateQuestTask(tileId, playerName);
     default:
       return generateSkillTask(tileId, playerStats);
   }
@@ -172,7 +174,10 @@ async function generateQuestTask(tileId: string, playerName: string): Promise<Ge
       return generateBossTask(tileId);
     }
     
-    const quests: QuestData[] = await response.json();
+    const data = await response.json();
+    
+    // API zwraca obiekt z właściwością quests, a nie bezpośrednio tablicę
+    const quests: QuestData[] = Array.isArray(data) ? data : (data.quests || []);
     
     // Filtruj questy które gracz może zacząć (userEligible: true) i nie są ukończone
     const availableQuests = quests.filter(quest => 
