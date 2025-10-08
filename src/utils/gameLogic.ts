@@ -306,16 +306,36 @@ function generateKeySources() {
   ];
 }
 
-// Generowanie zadań dla widocznych kafelków
+// Generowanie zadań dla widocznych kafelków I ich sąsiadów (z wyprzedzeniem)
 export async function generateTasksForVisibleTiles(gameState: GameState, playerName: string): Promise<GameState> {
   const visibleTiles = generateVisibleTiles(gameState);
   const newTileTasks = { ...gameState.tileTasks };
   
-  for (const { x, y } of visibleTiles) {
-    const tileId = `${x},${y}`;
-    
+  // Zbierz wszystkie kafelki do wygenerowania: widoczne + ich sąsiedzi
+  const tilesToGenerate = new Set<string>();
+  
+  // Dodaj widoczne kafelki
+  visibleTiles.forEach(({ x, y }) => {
+    tilesToGenerate.add(`${x},${y}`);
+  });
+  
+  // Dodaj sąsiadów widocznych kafelków (z wyprzedzeniem)
+  visibleTiles.forEach(({ x, y }) => {
+    const neighbors = getNeighborPositions(x, y);
+    neighbors.forEach(neighbor => {
+      tilesToGenerate.add(`${neighbor.x},${neighbor.y}`);
+    });
+  });
+  
+  // Generuj zadania dla wszystkich kafelków
+  for (const tileId of tilesToGenerate) {
     // Jeśli kafelek nie ma jeszcze zadania, wygeneruj je
     if (!newTileTasks[tileId]) {
+      const parts = tileId.split(',');
+      const x = parseInt(parts[0] || '0', 10);
+      const y = parseInt(parts[1] || '0', 10);
+      if (isNaN(x) || isNaN(y)) continue;
+      
       const task = await generateTaskForTile(tileId, gameState.playerStats, playerName);
       newTileTasks[tileId] = task;
     }
