@@ -42,16 +42,13 @@ export function savePlayerStats(playerName: string, stats: PlayerStats): void {
       timestamp: Date.now()
     };
     
-    // Usuń poprzednie dane tego gracza jeśli istnieją
     const filteredData = existingData.filter(p => p.playerName !== playerName.toLowerCase());
     
-    // Dodaj nowe dane
     const updatedData = [...filteredData, playerData];
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
-    console.log(`Zapisano statystyki gracza: ${playerName}`);
   } catch (error) {
-    console.error('Błąd podczas zapisywania statystyk:', error);
+    console.error('Error saving player stats:', error);
   }
 }
 
@@ -60,7 +57,7 @@ export function getSavedPlayers(): SavedPlayerData[] {
     const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   } catch (error) {
-    console.error('Błąd podczas odczytywania zapisanych graczy:', error);
+    console.error('Error loading saved players:', error);
     return [];
   }
 }
@@ -71,7 +68,7 @@ export function getPlayerStats(playerName: string): PlayerStats | null {
     const player = savedPlayers.find(p => p.playerName === playerName.toLowerCase());
     return player ? player.stats : null;
   } catch (error) {
-    console.error('Błąd podczas odczytywania statystyk gracza:', error);
+    console.error('Error loading player stats:', error);
     return null;
   }
 }
@@ -81,17 +78,15 @@ export function deletePlayerStats(playerName: string): void {
     const existingData = getSavedPlayers();
     const filteredData = existingData.filter(p => p.playerName !== playerName.toLowerCase());
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredData));
-    console.log(`Usunięto statystyki gracza: ${playerName}`);
   } catch (error) {
-    console.error('Błąd podczas usuwania statystyk:', error);
+    console.error('Error deleting player stats:', error);
   }
 }
 
 export function clearAllPlayerStats(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
-    console.log('Wyczyszczono wszystkie zapisane statystyki');
   } catch (error) {
-    console.error('Błąd podczas czyszczenia statystyk:', error);
+    console.error('Error clearing all player stats:', error);
   }
 }

@@ -1,35 +1,30 @@
-import { GameState, PlayerStats } from '@/types/game';
+import type { GameState, PlayerStats } from '@/types/game';
 
 const GAME_STATE_KEY = 'runeTile_gameState';
 
-// Zapisywanie stanu gry
 export function saveGameState(gameState: GameState): void {
   try {
     localStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameState));
-    console.log('Stan gry zapisany:', gameState.playerName);
   } catch (error) {
-    console.error('Błąd podczas zapisywania stanu gry:', error);
+    console.error('Error saving game state:', error);
   }
 }
 
-// Odczytywanie stanu gry
 export function loadGameState(): GameState | null {
   try {
     const data = localStorage.getItem(GAME_STATE_KEY);
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    console.error('Błąd podczas odczytywania stanu gry:', error);
+    console.error('Error loading game state:', error);
     return null;
   }
 }
 
-// Sprawdzanie czy gracz istnieje
 export function hasExistingGame(playerName: string): boolean {
   const gameState = loadGameState();
   return gameState?.playerName === playerName.toLowerCase();
 }
 
-// Aktualizacja statystyk gracza
 export function updatePlayerStats(newStats: PlayerStats): void {
   const gameState = loadGameState();
   if (gameState) {
@@ -39,7 +34,6 @@ export function updatePlayerStats(newStats: PlayerStats): void {
   }
 }
 
-// Dodawanie kluczy
 export function addKeys(amount: number): void {
   const gameState = loadGameState();
   if (gameState) {
@@ -48,7 +42,6 @@ export function addKeys(amount: number): void {
   }
 }
 
-// Oznaczanie źródła kluczy jako ukończone
 export function markKeySourceCompleted(sourceId: string): void {
   const gameState = loadGameState();
   if (gameState) {
@@ -61,19 +54,15 @@ export function markKeySourceCompleted(sourceId: string): void {
   }
 }
 
-// Resetowanie gry
 export function resetGame(): void {
   localStorage.removeItem(GAME_STATE_KEY);
-  console.log('Gra zresetowana');
 }
 
-// Eksport stanu gry
 export function exportGameState(): string {
   const gameState = loadGameState();
   return gameState ? JSON.stringify(gameState, null, 2) : '';
 }
 
-// Import stanu gry
 export function importGameState(jsonData: string): boolean {
   try {
     const gameState = JSON.parse(jsonData);
@@ -85,17 +74,14 @@ export function importGameState(jsonData: string): boolean {
   }
 }
 
-// Zapisywanie stanu slayer masterów
 export function saveSlayerMasters(slayerMasters: any[]): void {
   try {
     localStorage.setItem('runeTile_slayerMasters', JSON.stringify(slayerMasters));
-    console.log('Stan slayer masterów zapisany');
   } catch (error) {
     console.error('Błąd podczas zapisywania stanu slayer masterów:', error);
   }
 }
 
-// Ładowanie stanu slayer masterów
 export function loadSlayerMasters(): any[] | null {
   try {
     const data = localStorage.getItem('runeTile_slayerMasters');

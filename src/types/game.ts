@@ -1,5 +1,3 @@
-// Typy dla gry RuneTile
-
 export interface PlayerStats {
   overall: number;
   attack: number;
@@ -39,9 +37,9 @@ export interface Tile {
 }
 
 export enum TileState {
-  LOCKED = 'locked',      // Zablokowany - wymaga klucza
-  UNLOCKED = 'unlocked',   // Odblokowany - można wykonać zadanie
-  COMPLETED = 'completed'  // Ukończony - zadanie wykonane
+  LOCKED = 'locked',
+  UNLOCKED = 'unlocked',
+  COMPLETED = 'completed'
 }
 
 export interface Task {
@@ -98,7 +96,7 @@ export interface GeneratedTask {
   difficulty: TaskDifficulty;
   requirements: TaskRequirement[];
   rewards: TaskReward[];
-  skillName?: string; // Nazwa skilla dla zadań typu SKILL
+  skillName?: string;
 }
 
 export interface TaskRequirement {

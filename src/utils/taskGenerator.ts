@@ -91,15 +91,29 @@ function getSkillIcon(skillName: string | undefined): string {
   return `/src/assets/skills/${capitalizedSkill}_icon.png`;
 }
 
-export async function generateTaskForTile(tileId: string, playerStats: PlayerStats, playerName: string): Promise<GeneratedTask> {
+export async function generateTaskForTile(
+  tileId: string, 
+  playerStats: PlayerStats, 
+  playerName: string,
+  excludedCategories: string[] = []
+): Promise<GeneratedTask> {
   // Specjalne zadanie startowe dla kafelka (0,0)
   if (tileId === '0,0') {
     return generateStartTask(tileId);
   }
   
   // Użyj losowego generatora - zadania mają być losowe za każdym razem
-  const categories = Object.values(TaskCategory);
-  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+  // Ale wykluczamy kategorie które generują duplikaty
+  let availableCategories = Object.values(TaskCategory).filter(
+    cat => !excludedCategories.includes(cat)
+  );
+  
+  // Jeśli wszystkie kategorie są wykluczone, użyj wszystkich
+  if (availableCategories.length === 0) {
+    availableCategories = Object.values(TaskCategory);
+  }
+  
+  const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
   
   switch (randomCategory) {
     case TaskCategory.SKILL:
@@ -112,8 +126,6 @@ export async function generateTaskForTile(tileId: string, playerStats: PlayerSta
       return generateDropTask(tileId);
     case TaskCategory.GRANDEXCHANGE:
       return generateGrandExchangeTask(tileId);
-    case TaskCategory.QUEST:
-      return await generateQuestTask(tileId, playerName);
     default:
       return generateSkillTask(tileId, playerStats);
   }

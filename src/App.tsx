@@ -7,7 +7,6 @@ export function App() {
   const [playerName, setPlayerName] = useState("");
   const [isCheckingSavedGame, setIsCheckingSavedGame] = useState(true);
 
-  // Sprawdź czy istnieje zapisany gracz przy starcie
   useEffect(() => {
     const savedGame = loadGameState();
     if (savedGame && savedGame.playerName) {
@@ -19,7 +18,7 @@ export function App() {
   if (isCheckingSavedGame) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-lg">Sprawdzanie zapisanej gry...</div>
+        <div className="text-white text-lg">Checking saved game...</div>
       </div>
     );
   }

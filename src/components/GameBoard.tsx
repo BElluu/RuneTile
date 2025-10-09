@@ -14,7 +14,6 @@ interface GameBoardProps {
 export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTile, setSelectedTile] = useState<string | null>(null);
   const [zoom, setZoom] = useState(2); // 200% zoom na start
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -82,7 +81,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           setGameState({ ...savedState, playerStats: freshStats });
           setTimeout(() => centerOnLastUnlockedTile(), 100);
         } else {
-          console.error('Błąd podczas pobierania statystyk');
+          console.error('Error fetching character stats');
           setGameState(savedState);
           setTimeout(() => centerOnLastUnlockedTile(), 100);
         }
@@ -95,12 +94,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           setGameState(newGameState);
           setTimeout(() => centerOnLastUnlockedTile(), 100);
         } else {
-          throw new Error('Gracz nie został znaleziony w systemie OSRS. Sprawdź czy nazwa jest poprawna.');
+          throw new Error('Character not found in OSRS. Check if the name is correct.');
         }
       }
     } catch (error: unknown) {
-      console.error('Błąd podczas ładowania gry:', error);
-      setError(error instanceof Error ? error.message : 'Nieznany błąd');
+      console.error('Error loading game:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setIsLoading(false);
     }
@@ -111,10 +110,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     
     const isCompleted = gameState.completedTiles.includes(tileId);
     
-    // Nie klikaj na ukończone kafelki
     if (isCompleted) return;
     
-    // Toggle clicked tile
     if (clickedTile === tileId) {
       setClickedTile(null);
     } else {
@@ -143,7 +140,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     if (!gameState) return;
     
     const task = gameState.tileTasks[tileId];
-    let goldReward = 100; // Domyślna nagroda
+    let goldReward = 100;
     
     if (task) {
       switch (task.difficulty) {
@@ -279,7 +276,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
               type="text"
               value={playerName}
               onChange={(e) => onPlayerNameChange(e.target.value)}
-              placeholder="Wprowadź poprawną nazwę gracza"
+              placeholder="Enter a valid character name"
               disabled={isLoading}
               className={`w-full px-4 py-2 bg-gray-800 text-white border rounded focus:outline-none ${
                 isLoading 
@@ -297,7 +294,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                   : 'bg-blue-600 hover:bg-blue-700'
               } text-white`}
             >
-              {isLoading ? 'Sprawdzanie gracza...' : 'Spróbuj ponownie'}
+              {isLoading ? 'Checking character...' : 'Try again'}
             </button>
           </div>
         </div>
@@ -450,7 +447,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             className="flex-1 flex items-center justify-center p-8 w-full overflow-hidden"
             onMouseDown={(e) => {
               handleMouseDown(e);
-              // Zamknij clicked tile gdy klikniesz poza kafelkiem
               if ((e.target as HTMLElement).closest('.tile-element') === null) {
                 setClickedTile(null);
               }
@@ -509,14 +505,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               fontFamily: 'monospace'
                             }}
                             onClick={(e) => {
-                              // Nie toggle jeśli kliknięto w dziecko (np. hover panel)
                               if (e.target !== e.currentTarget && (e.target as HTMLElement).closest('.hover-panel')) {
                                 return;
                               }
                               handleTileClick(tileId);
                             }}
                             onMouseEnter={() => {
-                              // Anuluj timeout jeśli istnieje
                               if (hoverTimeoutRef.current) {
                                 clearTimeout(hoverTimeoutRef.current);
                                 hoverTimeoutRef.current = null;
@@ -524,7 +518,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               setHoverTile(tileId);
                             }}
                             onMouseLeave={() => {
-                              // Małe opóźnienie przed zamknięciem, aby móc najechać na hover
                               hoverTimeoutRef.current = setTimeout(() => {
                                 setHoverTile(null);
                                 hoverTimeoutRef.current = null;
@@ -564,7 +557,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               </div>
                             )}
                             
-                            {/* Status overlay - zielona fajka dla completed */}
                             {tileState === 'completed' && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-green-400 text-4xl font-bold drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
@@ -573,7 +565,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               </div>
                             )}
                             
-                            {/* Status overlay - kłódka dla locked */}
                             {tileState === 'locked' && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-yellow-400 text-3xl font-bold drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
@@ -582,7 +573,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               </div>
                             )}
                             
-                            {/* Hover effect */}
                             {tileState !== 'completed' && (
                               <div className="absolute inset-0 bg-white/5 opacity-0 hover:opacity-100 transition-opacity rounded-sm" />
                             )}
@@ -590,14 +580,11 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         );
                       })}
                       
-                      {/* Hover hints - po prawej stronie kafelka */}
                       {hoverTile && !popupTile && (() => {
                         const task = gameState.tileTasks[hoverTile];
                         const parts = hoverTile.split(',');
                         const x = parseInt(parts[0] || '0', 10);
                         const y = parseInt(parts[1] || '0', 10);
-                        
-                        // Pozycja kafelka w przetransformowanej przestrzeni
                         const tileLeft = x * 88;
                         const tileTop = y * 88;
                         const tileWidth = 80;
@@ -610,11 +597,9 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               top: `${tileTop}px`,
                             }}
                             onClick={(e) => {
-                              // Zatrzymaj propagację do kafelka
                               e.stopPropagation();
                             }}
                             onMouseEnter={() => {
-                              // Anuluj timeout gdy najedziesz na hover
                               if (hoverTimeoutRef.current) {
                                 clearTimeout(hoverTimeoutRef.current);
                                 hoverTimeoutRef.current = null;
@@ -622,12 +607,10 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               setHoverTile(hoverTile);
                             }}
                             onMouseLeave={(e) => {
-                              // Nie zamykaj jeśli zjechałeś na dziecko (np. przycisk)
                               const relatedTarget = e.relatedTarget as HTMLElement;
                               if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
                                 return;
                               }
-                              // Zamknij hover gdy zjedziesz z niego
                               setHoverTile(null);
                             }}
                           >
@@ -645,7 +628,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               </div>
                             </div>
                             
-                            {/* Rozszerzenie w dół po kliknięciu */}
                             {clickedTile === hoverTile && (() => {
                               const isUnlocked = gameState.unlockedTiles.includes(hoverTile);
                               const isCompleted = gameState.completedTiles.includes(hoverTile);
@@ -664,7 +646,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        console.log('Complete button clicked!');
                                         handleCompleteTile(hoverTile);
                                       }}
                                       onMouseDown={(e) => {
@@ -680,7 +661,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        console.log('Unlock button clicked!');
                                         handleUnlockTile(hoverTile);
                                       }}
                                       onMouseDown={(e) => {
@@ -705,36 +685,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                       })()}
             </div>
           </div>
-
-                  {/* Details of selected tile */}
-                  {selectedTile && (
-                    <div className="bg-gray-800 p-4 border-t-2 border-gray-700">
-                      <h3 className="font-bold mb-2">Tile {selectedTile}</h3>
-                      <div className="text-sm text-gray-300">
-                        {gameState.tileTasks[selectedTile] ? (
-                          <div>
-                            <div className="font-semibold text-white mb-1">
-                              {gameState.tileTasks[selectedTile].title}
-                            </div>
-                            <div className="mb-2">
-                              {gameState.tileTasks[selectedTile].description}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              Category: {gameState.tileTasks[selectedTile].category} | 
-                              Difficulty: {gameState.tileTasks[selectedTile].difficulty}
-                            </div>
-                          </div>
-                        ) : (
-                          <div>
-                            {canUnlockTile(selectedTile, gameState) 
-                              ? 'You can unlock this tile!' 
-                              : 'This tile cannot be unlocked'
-                            }
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
         </div>
       </div>
 
@@ -773,73 +723,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                       slayerMasters={slayerMasters} 
                       onTaskComplete={handleSlayerTaskComplete}
                     />
-                  </div>
-                </div>
-              )}
-
-              {/* Small popups for tiles */}
-              {popupTile && gameState && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
-                  <div className="bg-gray-900 p-4 rounded border-2 border-gray-600 shadow-lg">
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-lg font-bold text-white">Tile {popupTile}</h3>
-                      <button
-                        onClick={() => setPopupTile(null)}
-                        className="text-white hover:text-gray-300 text-lg"
-                      >
-                        ×
-                      </button>
-                    </div>
-                    
-                    {(() => {
-                      const isUnlocked = gameState.unlockedTiles.includes(popupTile);
-                      const task = gameState.tileTasks[popupTile];
-                      
-                      if (isUnlocked) {
-                        return (
-                          <div className="text-sm text-gray-300">
-                            <div className="font-semibold text-blue-400 mb-2">
-                              ⚡ Task unlocked
-                            </div>
-                            <div className="mb-2">
-                              {task?.title} - {task?.description}
-                            </div>
-                            <div className="text-xs text-gray-400 mb-3">
-                              Category: {task?.category} | 
-                              Difficulty: {task?.difficulty}
-                            </div>
-                            <button
-                              onClick={() => handleCompleteTile(popupTile)}
-                              className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 border border-green-500"
-                            >
-                              Complete task (+gold)
-                            </button>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div className="text-sm text-gray-300">
-                            <div className="font-semibold text-yellow-400 mb-2">
-                              🔒 Tile locked
-                            </div>
-                            <div className="mb-2">
-                              {task?.title} - {task?.description}
-                            </div>
-                            <div className="text-xs text-gray-400 mb-3">
-                              Category: {task?.category} | 
-                              Difficulty: {task?.difficulty}
-                            </div>
-                            <button
-                              onClick={() => handleUnlockTile(popupTile)}
-                              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-500"
-                              disabled={gameState.keys < 1}
-                            >
-                              Unlock with 1 key
-                            </button>
-                          </div>
-                        );
-                      }
-                    })()}
                   </div>
                 </div>
               )}
