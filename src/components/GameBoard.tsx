@@ -539,9 +539,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                 ? 'bg-gray-800 border-gray-600' 
                                 : tileState === 'unlocked'
                                   ? 'bg-green-800 border-green-600 shadow-lg shadow-green-500/20'
-                                  : canUnlock
-                                    ? 'bg-blue-800 border-blue-600 shadow-lg shadow-blue-500/20'
-                                    : 'bg-gray-800 border-gray-600'
+                                  : 'bg-gray-800 border-gray-600'
                               }
                             `} />
                             
@@ -566,24 +564,21 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               </div>
                             )}
                             
-                            {/* Lock icon */}
-                            {tileState === 'locked' && (
-                              <div className="absolute top-1 right-1 w-4 h-4 bg-yellow-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
-                                🔒
-                              </div>
-                            )}
-                            
-                            {/* Green bird icon */}
+                            {/* Status overlay - zielona fajka dla completed */}
                             {tileState === 'completed' && (
-                              <div className="absolute top-1 right-1 w-4 h-4 bg-green-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
-                                ✓
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-green-400 text-4xl font-bold drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+                                  ✓
+                                </div>
                               </div>
                             )}
                             
-                            {/* Unlocked icon */}
-                            {tileState === 'unlocked' && (
-                              <div className="absolute top-1 right-1 w-4 h-4 bg-blue-400 rounded-sm flex items-center justify-center text-xs font-bold text-black">
-                                ⚡
+                            {/* Status overlay - kłódka dla locked */}
+                            {tileState === 'locked' && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-yellow-400 text-3xl font-bold drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+                                  🔒
+                                </div>
                               </div>
                             )}
                             
