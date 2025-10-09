@@ -663,9 +663,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                   <div className="text-sm text-gray-300 mb-3">
                                     {task?.description}
                                   </div>
-                                  <div className="text-xs text-gray-400 mb-3">
-                                    Category: {task?.category} | Difficulty: {task?.difficulty}
-                                  </div>
                                   
                                   {isUnlocked ? (
                                     <button
@@ -678,9 +675,10 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onMouseDown={(e) => {
                                         e.stopPropagation();
                                       }}
-                                      className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 border border-green-500"
+                                      className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 border border-green-500 flex items-center justify-center gap-2"
                                     >
-                                      Complete task (+gold)
+                                      <span className="text-lg">✓</span>
+                                      <span>Complete</span>
                                     </button>
                                   ) : canUnlock ? (
                                     <button
@@ -693,10 +691,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onMouseDown={(e) => {
                                         e.stopPropagation();
                                       }}
-                                      className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-500"
+                                      className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-500 flex items-center justify-center gap-2"
                                       disabled={gameState.keys < 1}
                                     >
-                                      Unlock with 1 key
+                                      <img 
+                                        src="/src/assets/key_icon.png" 
+                                        alt="Key" 
+                                        className="w-4 h-4"
+                                      />
+                                      <span>Unlock</span>
                                     </button>
                                   ) : null}
                                 </div>
