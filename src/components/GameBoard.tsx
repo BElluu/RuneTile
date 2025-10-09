@@ -25,6 +25,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [hoverTile, setHoverTile] = useState<string | null>(null);
   const [clickedTile, setClickedTile] = useState<string | null>(null);
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const gameBoardRef = React.useRef<HTMLDivElement>(null);
+  const wheelListenerRef = React.useRef<((e: Event) => void) | null>(null);
   const [slayerMasters, setSlayerMasters] = useState([
     { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: 5 },
     { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: 5 },
@@ -52,6 +54,33 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     return () => {
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!gameState) return;
+    if (wheelListenerRef.current) return;
+    
+    const handleWheelEvent = (e: Event) => {
+      const wheelEvent = e as WheelEvent;
+      wheelEvent.preventDefault();
+      const delta = wheelEvent.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
+    };
+
+    const gameContainer = gameBoardRef.current;
+    if (gameContainer) {
+      wheelListenerRef.current = handleWheelEvent;
+      gameContainer.addEventListener('wheel', handleWheelEvent, { passive: false });
+    }
+  }, [gameState]);
+  
+  useEffect(() => {
+    return () => {
+      const gameContainer = gameBoardRef.current;
+      if (gameContainer && wheelListenerRef.current) {
+        gameContainer.removeEventListener('wheel', wheelListenerRef.current);
       }
     };
   }, []);
@@ -197,12 +226,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     setIsDragging(false);
   };
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    handleZoom(delta);
-  };
-
   const handleSlayerTaskComplete = (masterName: string) => {
     if (!gameState) return;
     
@@ -344,7 +367,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   }
 
   return (
-    <div className="game-board bg-black min-h-screen text-white w-full">
+    <div ref={gameBoardRef} className="game-board bg-black min-h-screen text-white w-full">
       <div className="flex h-screen w-full">
         <div className="absolute top-4 left-4 z-10 flex gap-2">
           <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
@@ -454,7 +477,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            onWheel={handleWheel}
             style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           >
             <div 
