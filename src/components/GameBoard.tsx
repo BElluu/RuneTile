@@ -38,7 +38,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
   useEffect(() => {
     const savedGame = loadGameState();
-    if (savedGame && savedGame.playerName === playerName.toLowerCase()) {
+    if (savedGame && savedGame.playerName === playerName) {
       loadGame();
     }
 
@@ -65,7 +65,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     try {
       const savedState = loadGameState();
       
-      if (savedState && savedState.playerName === playerName.toLowerCase()) {
+      if (savedState && savedState.playerName === playerName) {
         const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
         if (response.ok) {
           const freshStats = await response.json();
@@ -81,7 +81,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
         if (response.ok) {
           const playerStats = await response.json();
-          const newGameState = await generateInitialGameState(playerName.toLowerCase(), playerStats);
+          const newGameState = await generateInitialGameState(playerName, playerStats);
           saveGameState(newGameState);
           setGameState(newGameState);
           setTimeout(() => centerOnLastUnlockedTile(), 100);
