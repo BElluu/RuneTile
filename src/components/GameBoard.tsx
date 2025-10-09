@@ -24,6 +24,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [showSlayerModal, setShowSlayerModal] = useState(false);
   const [popupTile, setPopupTile] = useState<string | null>(null);
   const [hoverTile, setHoverTile] = useState<string | null>(null);
+  const [clickedTile, setClickedTile] = useState<string | null>(null);
+  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const [slayerMasters, setSlayerMasters] = useState([
     { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: 5 },
     { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: 5 },
@@ -46,6 +48,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     if (savedSlayerMasters) {
       setSlayerMasters(savedSlayerMasters);
     }
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -100,18 +109,16 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const handleTileClick = async (tileId: string) => {
     if (!gameState) return;
     
-    const isUnlocked = gameState.unlockedTiles.includes(tileId);
     const isCompleted = gameState.completedTiles.includes(tileId);
-    const canUnlock = canUnlockTile(tileId, gameState);
     
-    if (isCompleted) {
-      setSelectedTile(tileId);
-    } else if (isUnlocked) {
-      setPopupTile(tileId);
-    } else if (canUnlock) {
-      setPopupTile(tileId);
+    // Nie klikaj na ukończone kafelki
+    if (isCompleted) return;
+    
+    // Toggle clicked tile
+    if (clickedTile === tileId) {
+      setClickedTile(null);
     } else {
-      setSelectedTile(tileId);
+      setClickedTile(tileId);
     }
   };
 
@@ -125,6 +132,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       setGameState(newGameState);
       saveGameState(newGameState);
       setPopupTile(null);
+      setClickedTile(null);
+      setHoverTile(null);
     } catch (error: unknown) {
       alert(error instanceof Error ? error.message : 'Nieznany błąd');
     }
@@ -165,6 +174,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     setGameState(newGameState);
     saveGameState(newGameState);
     setPopupTile(null);
+    setClickedTile(null);
+    setHoverTile(null);
   };
 
   const handleZoom = (delta: number) => {
@@ -434,10 +445,16 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             </div>
           </div>
 
-          {/* Grid of tiles with zoom and pan */}
+           {/* Grid of tiles with zoom and pan */}
           <div 
             className="flex-1 flex items-center justify-center p-8 w-full overflow-hidden"
-            onMouseDown={handleMouseDown}
+            onMouseDown={(e) => {
+              handleMouseDown(e);
+              // Zamknij clicked tile gdy klikniesz poza kafelkiem
+              if ((e.target as HTMLElement).closest('.tile-element') === null) {
+                setClickedTile(null);
+              }
+            }}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
@@ -474,6 +491,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                           <div
                             key={tileId}
                             className={`
+                              tile-element
                               absolute w-20 h-20 cursor-pointer
                               ${tileState === 'completed' 
                                 ? 'opacity-60' 
@@ -490,9 +508,28 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               imageRendering: 'pixelated',
                               fontFamily: 'monospace'
                             }}
-                            onClick={() => handleTileClick(tileId)}
-                            onMouseEnter={() => setHoverTile(tileId)}
-                            onMouseLeave={() => setHoverTile(null)}
+                            onClick={(e) => {
+                              // Nie toggle jeśli kliknięto w dziecko (np. hover panel)
+                              if (e.target !== e.currentTarget && (e.target as HTMLElement).closest('.hover-panel')) {
+                                return;
+                              }
+                              handleTileClick(tileId);
+                            }}
+                            onMouseEnter={() => {
+                              // Anuluj timeout jeśli istnieje
+                              if (hoverTimeoutRef.current) {
+                                clearTimeout(hoverTimeoutRef.current);
+                                hoverTimeoutRef.current = null;
+                              }
+                              setHoverTile(tileId);
+                            }}
+                            onMouseLeave={() => {
+                              // Małe opóźnienie przed zamknięciem, aby móc najechać na hover
+                              hoverTimeoutRef.current = setTimeout(() => {
+                                setHoverTile(null);
+                                hoverTimeoutRef.current = null;
+                              }, 100);
+                            }}
                             title={task ? `${task.title}\n${task.description}` : undefined}
                           >
                             {/* Background */}
@@ -557,6 +594,117 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                           </div>
                         );
                       })}
+                      
+                      {/* Hover hints - po prawej stronie kafelka */}
+                      {hoverTile && !popupTile && (() => {
+                        const task = gameState.tileTasks[hoverTile];
+                        const parts = hoverTile.split(',');
+                        const x = parseInt(parts[0] || '0', 10);
+                        const y = parseInt(parts[1] || '0', 10);
+                        
+                        // Pozycja kafelka w przetransformowanej przestrzeni
+                        const tileLeft = x * 88;
+                        const tileTop = y * 88;
+                        const tileWidth = 80;
+                        
+                        return (
+                          <div 
+                            className="hover-panel absolute z-20 pointer-events-auto"
+                            style={{
+                              left: `${tileLeft + tileWidth + 8}px`,
+                              top: `${tileTop}px`,
+                            }}
+                            onClick={(e) => {
+                              // Zatrzymaj propagację do kafelka
+                              e.stopPropagation();
+                            }}
+                            onMouseEnter={() => {
+                              // Anuluj timeout gdy najedziesz na hover
+                              if (hoverTimeoutRef.current) {
+                                clearTimeout(hoverTimeoutRef.current);
+                                hoverTimeoutRef.current = null;
+                              }
+                              setHoverTile(hoverTile);
+                            }}
+                            onMouseLeave={(e) => {
+                              // Nie zamykaj jeśli zjechałeś na dziecko (np. przycisk)
+                              const relatedTarget = e.relatedTarget as HTMLElement;
+                              if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+                                return;
+                              }
+                              // Zamknij hover gdy zjedziesz z niego
+                              setHoverTile(null);
+                            }}
+                          >
+                            <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg flex items-center gap-3 min-w-[200px]">
+                              {task && (
+                                <img 
+                                  src={getTaskIcon(task.category)} 
+                                  alt={task.category}
+                                  className="w-8 h-8 opacity-40"
+                                  style={{ imageRendering: 'pixelated' }}
+                                />
+                              )}
+                              <div className="text-sm text-white font-semibold">
+                                {task?.title || 'Unknown task'}
+                              </div>
+                            </div>
+                            
+                            {/* Rozszerzenie w dół po kliknięciu */}
+                            {clickedTile === hoverTile && (() => {
+                              const isUnlocked = gameState.unlockedTiles.includes(hoverTile);
+                              const isCompleted = gameState.completedTiles.includes(hoverTile);
+                              const canUnlock = canUnlockTile(hoverTile, gameState);
+                              
+                              if (isCompleted) return null;
+                              
+                              return (
+                                <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg mt-2">
+                                  <div className="text-sm text-gray-300 mb-3">
+                                    {task?.description}
+                                  </div>
+                                  <div className="text-xs text-gray-400 mb-3">
+                                    Category: {task?.category} | Difficulty: {task?.difficulty}
+                                  </div>
+                                  
+                                  {isUnlocked ? (
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log('Complete button clicked!');
+                                        handleCompleteTile(hoverTile);
+                                      }}
+                                      onMouseDown={(e) => {
+                                        e.stopPropagation();
+                                      }}
+                                      className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 border border-green-500"
+                                    >
+                                      Complete task (+gold)
+                                    </button>
+                                  ) : canUnlock ? (
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log('Unlock button clicked!');
+                                        handleUnlockTile(hoverTile);
+                                      }}
+                                      onMouseDown={(e) => {
+                                        e.stopPropagation();
+                                      }}
+                                      className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-500"
+                                      disabled={gameState.keys < 1}
+                                    >
+                                      Unlock with 1 key
+                                    </button>
+                                  ) : null}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        );
+                      })()}
             </div>
           </div>
 
@@ -690,66 +838,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                             >
                               Unlock with 1 key
                             </button>
-                          </div>
-                        );
-                      }
-                    })()}
-                  </div>
-                </div>
-              )}
-
-              {/* Hover hints */}
-              {hoverTile && gameState && !popupTile && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                  <div className="bg-gray-900 p-3 rounded border-2 border-gray-600 shadow-lg max-w-xs">
-                    {(() => {
-                      const isUnlocked = gameState.unlockedTiles.includes(hoverTile);
-                      const isCompleted = gameState.completedTiles.includes(hoverTile);
-                      const canUnlock = canUnlockTile(hoverTile, gameState);
-                      const task = gameState.tileTasks[hoverTile];
-                      
-                      if (isCompleted) {
-                        return (
-                          <div className="text-sm text-gray-300">
-                            <div className="font-semibold text-green-400 mb-1">
-                              ✅ Completed
-                            </div>
-                            <div className="text-xs">
-                              {task?.title}
-                            </div>
-                          </div>
-                        );
-                      } else if (isUnlocked) {
-                        return (
-                          <div className="text-sm text-gray-300">
-                            <div className="font-semibold text-blue-400 mb-1">
-                              ⚡ Click to complete
-                            </div>
-                            <div className="text-xs">
-                              {task?.title}
-                            </div>
-                          </div>
-                        );
-                      } else if (canUnlock) {
-                        return (
-                          <div className="text-sm text-gray-300">
-                            <div className="font-semibold text-yellow-400 mb-1">
-                              🔒 Click to unlock
-                            </div>
-                            <div className="text-xs">
-                              {task?.title}
-                            </div>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div className="text-sm text-gray-300">
-                            <div className="font-semibold text-gray-400 mb-1">
-                              🔒 Locked
-                            </div>
-                            <div className="text-xs">
-                              {task?.title || 'Unknown task'}
-                            </div>
                           </div>
                         );
                       }
