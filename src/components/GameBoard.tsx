@@ -604,7 +604,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         
                         return (
                           <div 
-                            className="hover-panel absolute z-20 pointer-events-auto"
+                            className="hover-panel absolute z-20 pointer-events-auto animate-in fade-in duration-500"
                             style={{
                               left: `${tileLeft + tileWidth + 8}px`,
                               top: `${tileTop}px`,
@@ -631,7 +631,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               setHoverTile(null);
                             }}
                           >
-                            <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg flex items-center gap-3 min-w-[200px]">
+                            <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg flex items-center gap-3 min-w-[200px] transition-all duration-300">
                               {task && (
                                 <img 
                                   src={getTaskIcon(task.category)} 
@@ -654,7 +654,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               if (isCompleted) return null;
                               
                               return (
-                                <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg mt-2">
+                                <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg mt-2 animate-in slide-in-from-top duration-300">
                                   <div className="text-sm text-gray-300 mb-3">
                                     {task?.description}
                                   </div>
