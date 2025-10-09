@@ -64,10 +64,17 @@ const GE_ITEMS = [
 ];
 
 // Funkcja do pobierania ikony dla typu zadania
-export function getTaskIcon(category: TaskCategory): string {
+export function getTaskIcon(category: TaskCategory, skillName?: string): string {
+  if (category === TaskCategory.SKILL && skillName) {
+    // Dla zadań SKILL używamy ikony konkretnego skilla
+    // Capitalize pierwszą literę (attack -> Attack)
+    const capitalizedSkill = skillName.charAt(0).toUpperCase() + skillName.slice(1);
+    return `/src/assets/skills/${capitalizedSkill}_icon.png`;
+  }
+  
   switch (category) {
     case TaskCategory.SKILL:
-      return '/src/assets/skills/Attack_icon.png'; // Używamy ikony skilla jako przykład
+      return '/src/assets/skills/Attack_icon.png'; // Fallback dla skill
     case TaskCategory.QUEST:
       return '/src/assets/skills/Prayer_icon.png'; // Używamy ikony quest jako przykład
     case TaskCategory.BOSS:
@@ -151,6 +158,7 @@ function generateSkillTask(tileId: string, playerStats: PlayerStats): GeneratedT
     description: `Train ${skill} from level ${currentLevel} to level ${targetLevel}`,
     category: TaskCategory.SKILL,
     difficulty,
+    skillName: skill, // Dodaj nazwę skilla
     requirements: [{
       type: 'skill',
       target: skill,

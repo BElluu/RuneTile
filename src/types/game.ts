@@ -95,6 +95,7 @@ export interface GeneratedTask {
   difficulty: TaskDifficulty;
   requirements: TaskRequirement[];
   rewards: TaskReward[];
+  skillName?: string; // Nazwa skilla dla zadań typu SKILL
 }
 
 export interface TaskRequirement {

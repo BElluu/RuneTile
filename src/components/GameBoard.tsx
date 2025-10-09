@@ -552,7 +552,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                             {task && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <img 
-                                  src={getTaskIcon(task.category)} 
+                                  src={getTaskIcon(task.category, task.skillName)} 
                                   alt={task.category}
                                   className={`
                                     w-10 h-10
@@ -634,7 +634,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                             <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg flex items-center gap-3 min-w-[200px] transition-all duration-300">
                               {task && (
                                 <img 
-                                  src={getTaskIcon(task.category)} 
+                                  src={getTaskIcon(task.category, task.skillName)} 
                                   alt={task.category}
                                   className="w-8 h-8 opacity-40"
                                   style={{ imageRendering: 'pixelated' }}
