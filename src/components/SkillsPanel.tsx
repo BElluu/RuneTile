@@ -35,7 +35,14 @@ export function SkillsPanel({ playerStats }: SkillsPanelProps) {
   return (
     <div className="grid grid-cols-3 gap-1">
       {skills.map((skill, index) => (
-        <div key={index} className="flex flex-col items-center p-1 bg-gray-700 rounded">
+        <div 
+          key={index} 
+          className="flex flex-col items-center p-1 rounded"
+          style={{
+            backgroundColor: '#2d2925',
+            border: '1px solid #4a443f'
+          }}
+        >
           <img 
             src={skill.icon} 
             alt={skill.name} 

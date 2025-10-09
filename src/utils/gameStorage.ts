@@ -69,7 +69,7 @@ export function importGameState(jsonData: string): boolean {
     saveGameState(gameState);
     return true;
   } catch (error) {
-    console.error('Błąd podczas importu stanu gry:', error);
+    console.error('Error importing game state:', error);
     return false;
   }
 }
@@ -78,7 +78,7 @@ export function saveSlayerMasters(slayerMasters: any[]): void {
   try {
     localStorage.setItem('runeTile_slayerMasters', JSON.stringify(slayerMasters));
   } catch (error) {
-    console.error('Błąd podczas zapisywania stanu slayer masterów:', error);
+    console.error('Error saving slayer master state:', error);
   }
 }
 
@@ -87,7 +87,7 @@ export function loadSlayerMasters(): any[] | null {
     const data = localStorage.getItem('runeTile_slayerMasters');
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    console.error('Błąd podczas ładowania stanu slayer masterów:', error);
+    console.error('Error loading slayer master state:', error);
     return null;
   }
 }

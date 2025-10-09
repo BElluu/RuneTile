@@ -9,6 +9,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 
+// Initialize font preference
+const savedFontPreference = localStorage.getItem('useRunescapeFont');
+if (savedFontPreference === 'false') {
+  document.body.classList.add('default-font');
+} else {
+  document.body.classList.add('runescape-font');
+}
+
 const elem = document.getElementById("root")!;
 const app = (
   <StrictMode>

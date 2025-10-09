@@ -5,6 +5,7 @@ import { generateVisibleTiles, canUnlockTile, unlockTile, generateInitialGameSta
 import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
+import { SettingsModal } from './SettingsModal';
 
 interface GameBoardProps {
   playerName: string;
@@ -21,6 +22,11 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [error, setError] = useState<string | null>(null);
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showSlayerModal, setShowSlayerModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [useRunescapeFont, setUseRunescapeFont] = useState(() => {
+    const saved = localStorage.getItem('useRunescapeFont');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [popupTile, setPopupTile] = useState<string | null>(null);
   const [hoverTile, setHoverTile] = useState<string | null>(null);
   const [clickedTile, setClickedTile] = useState<string | null>(null);
@@ -50,13 +56,23 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       setSlayerMasters(savedSlayerMasters);
     }
 
-    // Cleanup timeout on unmount
     return () => {
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (useRunescapeFont) {
+      document.body.classList.add('runescape-font');
+      document.body.classList.remove('default-font');
+    } else {
+      document.body.classList.add('default-font');
+      document.body.classList.remove('runescape-font');
+    }
+    localStorage.setItem('useRunescapeFont', String(useRunescapeFont));
+  }, [useRunescapeFont]);
 
   useEffect(() => {
     if (!gameState) return;
@@ -161,7 +177,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       setClickedTile(null);
       setHoverTile(null);
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : 'Nieznany błąd');
+      alert(error instanceof Error ? error.message : 'Unknown error');
     }
   };
 
@@ -287,12 +303,25 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     setPan({ x: offsetX, y: offsetY });
   };
 
+  const handleResetProgress = () => {
+    const currentFontPreference = useRunescapeFont;
+    localStorage.clear();
+    localStorage.setItem('useRunescapeFont', String(currentFontPreference));
+    window.location.reload();
+  };
+
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="bg-gray-900 p-8 rounded-lg border-2 border-red-700 max-w-md w-full">
-          <h1 className="text-2xl font-bold text-red-400 text-center mb-4">Błąd</h1>
+      <div className="min-h-screen flex items-center justify-center">
+        <div 
+          className="p-8 rounded-lg border-2 max-w-md w-full"
+          style={{
+            backgroundColor: '#2d2925',
+            borderColor: '#8B4545'
+          }}
+        >
+          <h1 className="text-2xl font-bold text-red-400 text-center mb-4">Opps...</h1>
           <p className="text-gray-300 text-center mb-6">{error}</p>
           <div className="space-y-4">
             <input
@@ -301,21 +330,24 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
               onChange={(e) => onPlayerNameChange(e.target.value)}
               placeholder="Enter a valid character name"
               disabled={isLoading}
-              className={`w-full px-4 py-2 bg-gray-800 text-white border rounded focus:outline-none ${
-                isLoading 
-                  ? 'border-gray-500 cursor-not-allowed opacity-50' 
-                  : 'border-gray-600 focus:border-blue-500'
-              }`}
+              className="w-full px-4 py-2 text-white border rounded focus:outline-none"
+              style={{
+                backgroundColor: '#1e1812',
+                borderColor: isLoading ? '#4a443f' : '#574f47'
+              }}
               onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
             />
             <button
               onClick={() => loadGame()}
               disabled={isLoading}
-              className={`w-full px-6 py-2 rounded ${
-                isLoading
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } text-white`}
+              className="w-full px-6 py-2 rounded text-white transition-colors border"
+              style={{
+                background: isLoading ? '#4a443f' : 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+                borderColor: '#3D2F24',
+                cursor: isLoading ? 'not-allowed' : 'pointer'
+              }}
+              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#6a5344')}
+              onMouseLeave={(e) => !isLoading && (e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)')}
             >
               {isLoading ? 'Checking character...' : 'Try again'}
             </button>
@@ -327,8 +359,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
   if (!gameState) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="bg-gray-900 p-8 rounded-lg border-2 border-gray-700 max-w-md w-full">
+      <div className="min-h-screen flex items-center justify-center">
+        <div 
+          className="p-8 rounded-lg border-2 max-w-md w-full"
+          style={{
+            backgroundColor: '#2d2925',
+            borderColor: '#4a443f'
+          }}
+        >
           <h1 className="text-3xl font-bold text-white text-center mb-6">RuneTile</h1>
           
           <div className="space-y-4">
@@ -338,25 +376,34 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
               onChange={(e) => onPlayerNameChange(e.target.value)}
               placeholder="Enter your OSRS name"
               disabled={isLoading}
-              className={`w-full px-4 py-2 bg-gray-800 text-white border rounded focus:outline-none ${
-                isLoading 
-                  ? 'border-gray-500 cursor-not-allowed opacity-50' 
-                  : 'border-gray-600 focus:border-blue-500'
-              }`}
+              className="w-full px-4 py-2 text-white border rounded focus:outline-none"
+              style={{
+                backgroundColor: '#1e1812',
+                borderColor: isLoading ? '#4a443f' : '#574f47',
+                cursor: isLoading ? 'not-allowed' : 'text',
+                opacity: isLoading ? 0.5 : 1
+              }}
               onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
             />
             <button
               onClick={() => loadGame()}
               disabled={!playerName.trim() || isLoading}
-              className={`w-full px-6 py-2 rounded ${
-                isLoading
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } ${
-                !playerName.trim() && !isLoading
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : ''
-              } text-white`}
+              className="w-full px-6 py-2 rounded text-white transition-colors border"
+              style={{
+                background: (!playerName.trim() || isLoading) ? '#4a443f' : 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+                borderColor: '#3D2F24',
+                cursor: (!playerName.trim() || isLoading) ? 'not-allowed' : 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading && playerName.trim()) {
+                  e.currentTarget.style.backgroundColor = '#6a5344';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading && playerName.trim()) {
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
+                }
+              }}
             >
               {isLoading ? 'Checking player...' : 'Start game'}
             </button>
@@ -367,10 +414,16 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   }
 
   return (
-    <div ref={gameBoardRef} className="game-board bg-black min-h-screen text-white w-full">
+    <div ref={gameBoardRef} className="game-board min-h-screen text-white w-full">
       <div className="flex h-screen w-full">
         <div className="absolute top-4 left-4 z-10 flex gap-2">
-          <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
+          <div 
+            className="p-3 rounded border-2 flex flex-col items-center"
+            style={{
+              backgroundColor: '#3a3530',
+              borderColor: '#574f47'
+            }}
+          >
             <img 
               src="/src/assets/key_icon.png" 
               alt="Key" 
@@ -378,7 +431,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             />
             <div className="text-white font-bold text-lg">{gameState.keys}</div>
           </div>
-          <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
+          <div 
+            className="p-3 rounded border-2 flex flex-col items-center"
+            style={{
+              backgroundColor: '#3a3530',
+              borderColor: '#574f47'
+            }}
+          >
             <img 
               src="/src/assets/menu/gold_icon.png" 
               alt="Gold" 
@@ -388,7 +447,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           </div>
           <button
             onClick={() => setShowSkillsModal(!showSkillsModal)}
-            className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700"
+            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            style={{
+              backgroundColor: '#3a3530',
+              borderColor: '#574f47'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
             title="Skills"
           >
             <img 
@@ -404,7 +469,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         {/* Left panel */}
         <div className="absolute left-4 top-32 z-10 flex flex-col gap-2">
           {/* Daily */}
-          <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
+          <button 
+            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            style={{
+              backgroundColor: '#3a3530',
+              borderColor: '#574f47'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+          >
             <img 
               src="/src/assets/menu/Daily_icon.png" 
               alt="Daily" 
@@ -416,7 +489,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           {/* Slayer */}
           <button 
             onClick={() => setShowSlayerModal(!showSlayerModal)}
-            className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700"
+            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            style={{
+              backgroundColor: '#3a3530',
+              borderColor: '#574f47'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
           >
             <img 
               src="/src/assets/menu/SlayerMasters_icon.png" 
@@ -427,7 +506,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           </button>
 
           {/* Bosses */}
-          <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
+          <button 
+            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            style={{
+              backgroundColor: '#3a3530',
+              borderColor: '#574f47'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+          >
             <img 
               src="/src/assets/tasks/Bosses_icon.png" 
               alt="Bosses" 
@@ -439,28 +526,55 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
         {/* Main board */}
         <div className="flex-1 flex flex-col relative">
-          {/* Zoom controls */}
+          {/* Zoom controls and Settings */}
           <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
             <button
+              onClick={() => setShowSettingsModal(true)}
+              className="w-10 h-10 text-white border-2 rounded transition-colors flex items-center justify-center"
+              style={{
+                backgroundColor: '#3a3530',
+                borderColor: '#574f47'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+            >
+              <img 
+                src="/src/assets/menu/Settings_icon.png" 
+                alt="Settings" 
+                className="w-6 h-6"
+              />
+            </button>
+            <button
               onClick={() => handleZoom(0.1)}
-              className="w-10 h-10 bg-gray-800 text-white border border-gray-600 rounded hover:bg-gray-700"
+              className="w-10 h-10 text-white border-2 rounded transition-colors"
+              style={{
+                backgroundColor: '#3a3530',
+                borderColor: '#574f47'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
             >
               +
             </button>
             <button
               onClick={() => handleZoom(-0.1)}
-              className="w-10 h-10 bg-gray-800 text-white border border-gray-600 rounded hover:bg-gray-700"
+              className="w-10 h-10 text-white border-2 rounded transition-colors"
+              style={{
+                backgroundColor: '#3a3530',
+                borderColor: '#574f47'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
             >
               -
             </button>
-            <button
-              onClick={centerOnLastUnlockedTile}
-              className="w-10 h-10 bg-gray-800 text-white border border-gray-600 rounded hover:bg-gray-700"
-              title="Wycentruj na ostatnim odblokowanym kafelku"
+            <div 
+              className="w-10 h-10 text-white border-2 rounded flex items-center justify-center text-xs"
+              style={{
+                backgroundColor: '#3a3530',
+                borderColor: '#574f47'
+              }}
             >
-              🎯
-            </button>
-            <div className="w-10 h-10 bg-gray-800 text-white border border-gray-600 rounded flex items-center justify-center text-xs">
               {Math.round(zoom * 100)}%
             </div>
           </div>
@@ -548,15 +662,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                             title={task ? `${task.title}\n${task.description}` : undefined}
                           >
                             {/* Background */}
-                            <div className={`
-                              absolute inset-0 border-2 rounded-sm
-                              ${tileState === 'completed' 
-                                ? 'bg-gray-800 border-gray-600' 
-                                : tileState === 'unlocked'
-                                  ? 'bg-green-800 border-green-600 shadow-lg shadow-green-500/20'
-                                  : 'bg-gray-800 border-gray-600'
-                              }
-                            `} />
+                            <div 
+                              className="absolute inset-0 border-2 rounded-sm"
+                              style={{
+                                backgroundColor: tileState === 'completed' ? '#3a3530' : '#3a3530',
+                                borderColor: tileState === 'completed' ? '#574f47' : '#574f47',
+                                boxShadow: tileState === 'unlocked' ? '0 0 8px rgba(87, 79, 71, 0.3)' : 'none'
+                              }}
+                            />
                             
                             {/* Pattern */}
                             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent rounded-sm" />
@@ -629,14 +742,20 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               setHoverTile(hoverTile);
                             }}
                             onMouseLeave={(e) => {
-                              const relatedTarget = e.relatedTarget as HTMLElement;
-                              if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+                              const relatedTarget = e.relatedTarget as Node | null;
+                              if (relatedTarget && relatedTarget instanceof Node && e.currentTarget.contains(relatedTarget)) {
                                 return;
                               }
                               setHoverTile(null);
                             }}
                           >
-                            <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg flex items-center gap-3 min-w-[200px] transition-all duration-300">
+                            <div 
+                              className="p-3 rounded border-2 shadow-lg flex items-center gap-3 min-w-[200px] transition-all duration-300"
+                              style={{
+                                backgroundColor: 'rgba(58, 53, 48, 0.95)',
+                                borderColor: '#574f47'
+                              }}
+                            >
                               {task && (
                                 <img 
                                   src={getTaskIcon(task.category, task.skillName)} 
@@ -658,7 +777,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                               if (isCompleted) return null;
                               
                               return (
-                                <div className="bg-gray-900/95 p-3 rounded border-2 border-gray-600 shadow-lg mt-2 animate-in slide-in-from-top duration-300">
+                                <div 
+                                  className="p-3 rounded border-2 shadow-lg mt-2 animate-in slide-in-from-top duration-300"
+                                  style={{
+                                    backgroundColor: 'rgba(58, 53, 48, 0.95)',
+                                    borderColor: '#574f47'
+                                  }}
+                                >
                                   <div className="text-sm text-gray-300 mb-3">
                                     {task?.description}
                                   </div>
@@ -673,7 +798,18 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onMouseDown={(e) => {
                                         e.stopPropagation();
                                       }}
-                                      className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 border border-green-500 flex items-center justify-center gap-2"
+                                      className="w-full px-4 py-2 text-white rounded flex items-center justify-center gap-2 pixel-button"
+                                      style={{
+                                        background: 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)',
+                                        border: '2px solid',
+                                        borderColor: '#2F5522',
+                                        borderTopColor: '#8FBF6F',
+                                        borderLeftColor: '#8FBF6F',
+                                        boxShadow: '2px 2px 0px rgba(0,0,0,0.5)',
+                                        imageRendering: 'pixelated',
+                                        textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                                        cursor: 'pointer'
+                                      }}
                                     >
                                       <span className="text-lg">✓</span>
                                       <span>Complete</span>
@@ -688,13 +824,27 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onMouseDown={(e) => {
                                         e.stopPropagation();
                                       }}
-                                      className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-500 flex items-center justify-center gap-2"
+                                      className="w-full px-4 py-2 text-white rounded flex items-center justify-center gap-2 pixel-button"
+                                      style={{
+                                        background: gameState.keys < 1 
+                                          ? 'linear-gradient(180deg, #555 0%, #333 100%)' 
+                                          : 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+                                        border: '2px solid',
+                                        borderColor: gameState.keys < 1 ? '#666' : '#3D2F24',
+                                        borderTopColor: gameState.keys < 1 ? '#888' : '#A89070',
+                                        borderLeftColor: gameState.keys < 1 ? '#888' : '#A89070',
+                                        boxShadow: '2px 2px 0px rgba(0,0,0,0.5)',
+                                        imageRendering: 'pixelated',
+                                        textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                                        cursor: gameState.keys < 1 ? 'not-allowed' : 'pointer'
+                                      }}
                                       disabled={gameState.keys < 1}
                                     >
                                       <img 
                                         src="/src/assets/key_icon.png" 
                                         alt="Key" 
                                         className="w-4 h-4"
+                                        style={{ imageRendering: 'pixelated' }}
                                       />
                                       <span>Unlock</span>
                                     </button>
@@ -713,7 +863,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       {/* Skills Popup */}
       {showSkillsModal && (
         <div className="absolute top-4 left-32 z-20">
-          <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
+          <div 
+            className="p-3 rounded border-2"
+            style={{
+              backgroundColor: '#3a3530',
+              borderColor: '#574f47'
+            }}
+          >
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-bold text-white">Skills</h3>
               <button
@@ -731,7 +887,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
               {/* Slayer Masters Popup */}
               {showSlayerModal && (
                 <div className="absolute top-32 left-32 z-20">
-                  <div className="bg-gray-800 p-4 rounded border-2 border-gray-600 max-w-2xl">
+                  <div 
+                    className="p-4 rounded border-2 max-w-2xl"
+                    style={{
+                      backgroundColor: '#3a3530',
+                      borderColor: '#574f47'
+                    }}
+                  >
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="text-lg font-bold text-white">Slayer Masters</h3>
                       <button
@@ -748,6 +910,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                   </div>
                 </div>
               )}
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        useRunescapeFont={useRunescapeFont}
+        onFontChange={setUseRunescapeFont}
+        onResetProgress={handleResetProgress}
+      />
             </div>
           );
         }

@@ -16,7 +16,14 @@ export function SlayerMastersPanel({ slayerMasters, onTaskComplete }: SlayerMast
   return (
     <div className="grid grid-cols-3 gap-3">
       {slayerMasters.map((master) => (
-        <div key={master.name} className="flex flex-col items-center p-2 bg-gray-700 rounded border border-gray-600">
+        <div 
+          key={master.name} 
+          className="flex flex-col items-center p-2 rounded border"
+          style={{
+            backgroundColor: '#2d2925',
+            borderColor: '#4a443f'
+          }}
+        >
           <img 
             src={master.image} 
             alt={master.name} 
@@ -28,7 +35,13 @@ export function SlayerMastersPanel({ slayerMasters, onTaskComplete }: SlayerMast
           </div>
           <button
             onClick={() => onTaskComplete(master.name)}
-            className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-500 border border-blue-500"
+            className="px-2 py-1 text-white rounded text-xs transition-colors border"
+            style={{
+              background: 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+              borderColor: '#3D2F24'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6a5344'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)'}
           >
             +1
           </button>

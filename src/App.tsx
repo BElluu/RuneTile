@@ -17,7 +17,7 @@ export function App() {
 
   if (isCheckingSavedGame) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-white text-lg">Checking saved game...</div>
       </div>
     );
