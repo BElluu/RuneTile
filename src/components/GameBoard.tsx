@@ -313,44 +313,55 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div 
-          className="p-8 rounded-lg border-2 max-w-md w-full"
-          style={{
-            backgroundColor: '#2d2925',
-            borderColor: '#8B4545'
-          }}
-        >
-          <h1 className="text-2xl font-bold text-red-400 text-center mb-4">Opps...</h1>
-          <p className="text-gray-300 text-center mb-6">{error}</p>
-          <div className="space-y-4">
-            <input
-              type="text"
-              value={playerName}
-              onChange={(e) => onPlayerNameChange(e.target.value)}
-              placeholder="Enter a valid character name"
-              disabled={isLoading}
-              className="w-full px-4 py-2 text-white border rounded focus:outline-none"
-              style={{
-                backgroundColor: '#1e1812',
-                borderColor: isLoading ? '#4a443f' : '#574f47'
-              }}
-              onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
-            />
-            <button
-              onClick={() => loadGame()}
-              disabled={isLoading}
-              className="w-full px-6 py-2 rounded text-white transition-colors border"
-              style={{
-                background: isLoading ? '#4a443f' : 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
-                borderColor: '#3D2F24',
-                cursor: isLoading ? 'not-allowed' : 'pointer'
-              }}
-              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#6a5344')}
-              onMouseLeave={(e) => !isLoading && (e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)')}
-            >
-              {isLoading ? 'Checking character...' : 'Try again'}
-            </button>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="flex flex-col items-center w-full max-w-md">
+          <div 
+            className="p-8 rounded-lg border-2 w-full"
+            style={{
+              backgroundColor: '#2d2925',
+              borderColor: '#8B4545'
+            }}
+          >
+            <h1 className="text-2xl font-bold text-red-400 text-center mb-4">Opps...</h1>
+            <p className="text-gray-300 text-center mb-6">{error}</p>
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => onPlayerNameChange(e.target.value)}
+                placeholder="Enter a valid character name"
+                disabled={isLoading}
+                className="w-full px-4 py-2 text-white border rounded focus:outline-none"
+                style={{
+                  backgroundColor: '#1e1812',
+                  borderColor: isLoading ? '#4a443f' : '#574f47'
+                }}
+                onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
+              />
+              <button
+                onClick={() => loadGame()}
+                disabled={isLoading}
+                className="w-full px-6 py-2 rounded text-white transition-colors border"
+                style={{
+                  background: isLoading ? '#4a443f' : 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+                  borderColor: '#3D2F24',
+                  cursor: isLoading ? 'not-allowed' : 'pointer'
+                }}
+                onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#6a5344')}
+                onMouseLeave={(e) => !isLoading && (e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)')}
+              >
+                {isLoading ? 'Checking character...' : 'Try again'}
+              </button>
+            </div>
+          </div>
+          
+          {/* Copyright Notice */}
+          <div className="mt-6 text-center text-xs text-gray-300 px-4 max-w-lg">
+            <p>
+              RuneScape® and all related content are the property of Jagex Ltd. 
+              Used here under fair use/fan content purposes. 
+              This site is not affiliated with or endorsed by Jagex.
+            </p>
           </div>
         </div>
       </div>
@@ -359,54 +370,65 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
   if (!gameState) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div 
-          className="p-8 rounded-lg border-2 max-w-md w-full"
-          style={{
-            backgroundColor: '#2d2925',
-            borderColor: '#4a443f'
-          }}
-        >
-          <h1 className="text-3xl font-bold text-white text-center mb-6">RuneTile</h1>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="flex flex-col items-center w-full max-w-md">
+          <div 
+            className="p-8 rounded-lg border-2 w-full"
+            style={{
+              backgroundColor: '#2d2925',
+              borderColor: '#4a443f'
+            }}
+          >
+            <h1 className="text-3xl font-bold text-white text-center mb-6">RuneTile</h1>
+            
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => onPlayerNameChange(e.target.value)}
+                placeholder="Enter your OSRS name"
+                disabled={isLoading}
+                className="w-full px-4 py-2 text-white border rounded focus:outline-none"
+                style={{
+                  backgroundColor: '#1e1812',
+                  borderColor: isLoading ? '#4a443f' : '#574f47',
+                  cursor: isLoading ? 'not-allowed' : 'text',
+                  opacity: isLoading ? 0.5 : 1
+                }}
+                onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
+              />
+              <button
+                onClick={() => loadGame()}
+                disabled={!playerName.trim() || isLoading}
+                className="w-full px-6 py-2 rounded text-white transition-colors border"
+                style={{
+                  background: (!playerName.trim() || isLoading) ? '#4a443f' : 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+                  borderColor: '#3D2F24',
+                  cursor: (!playerName.trim() || isLoading) ? 'not-allowed' : 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoading && playerName.trim()) {
+                    e.currentTarget.style.backgroundColor = '#6a5344';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isLoading && playerName.trim()) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
+                  }
+                }}
+              >
+                {isLoading ? 'Checking player...' : 'Start game'}
+              </button>
+            </div>
+          </div>
           
-          <div className="space-y-4">
-            <input
-              type="text"
-              value={playerName}
-              onChange={(e) => onPlayerNameChange(e.target.value)}
-              placeholder="Enter your OSRS name"
-              disabled={isLoading}
-              className="w-full px-4 py-2 text-white border rounded focus:outline-none"
-              style={{
-                backgroundColor: '#1e1812',
-                borderColor: isLoading ? '#4a443f' : '#574f47',
-                cursor: isLoading ? 'not-allowed' : 'text',
-                opacity: isLoading ? 0.5 : 1
-              }}
-              onKeyPress={(e) => e.key === 'Enter' && !isLoading && loadGame()}
-            />
-            <button
-              onClick={() => loadGame()}
-              disabled={!playerName.trim() || isLoading}
-              className="w-full px-6 py-2 rounded text-white transition-colors border"
-              style={{
-                background: (!playerName.trim() || isLoading) ? '#4a443f' : 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
-                borderColor: '#3D2F24',
-                cursor: (!playerName.trim() || isLoading) ? 'not-allowed' : 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading && playerName.trim()) {
-                  e.currentTarget.style.backgroundColor = '#6a5344';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isLoading && playerName.trim()) {
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
-                }
-              }}
-            >
-              {isLoading ? 'Checking player...' : 'Start game'}
-            </button>
+          {/* Copyright Notice */}
+          <div className="mt-6 text-center text-xs text-gray-300 px-4 max-w-lg">
+            <p>
+              RuneScape® and all related content are the property of Jagex Ltd. 
+              Used here under fair use/fan content purposes. 
+              This site is not affiliated with or endorsed by Jagex.
+            </p>
           </div>
         </div>
       </div>
