@@ -228,7 +228,7 @@ export async function generateInitialGameState(playerName: string, playerStats: 
     id: `start_0,0`,
     title: 'Start Your Adventure',
     description: 'Use your first key to start adventure',
-    category: TaskCategory.OTHER,
+    category: TaskCategory.START,
     difficulty: TaskDifficulty.EASY,
     requirements: [{
       type: 'item' as const,
@@ -236,7 +236,7 @@ export async function generateInitialGameState(playerName: string, playerStats: 
       amount: 1
     }],
     rewards: [{
-      type: RewardType.KEYS,
+      type: RewardType.GOLD,
       amount: 0,
       description: 'Begin your journey'
     }]
@@ -262,8 +262,8 @@ function generateKeySources() {
     {
       id: 'slayer_master',
       name: 'Slayer Tasks',
-      description: 'Wykonaj zadania od Slayer Mastera',
-      category: TaskCategory.BOSS,
+      description: 'Complete Slayer Tasks',
+      category: TaskCategory.SLAYER,
       keysRewarded: 1,
       completed: false,
       currentCount: 0,
@@ -271,20 +271,9 @@ function generateKeySources() {
       icon: '💀'
     },
     {
-      id: 'dungeon_clear',
-      name: 'Dungeons',
-      description: 'Wykonaj dungeons',
-      category: TaskCategory.OTHER,
-      keysRewarded: 2,
-      completed: false,
-      currentCount: 0,
-      requiredCount: 3,
-      icon: '🏰'
-    },
-    {
       id: 'boss_kill',
-      name: 'Barrows',
-      description: 'Zabij bossów Barrows',
+      name: 'Boss Tasks',
+      description: 'Kill bosses',
       category: TaskCategory.BOSS,
       keysRewarded: 3,
       completed: false,
@@ -293,10 +282,10 @@ function generateKeySources() {
       icon: '⚔️'
     },
     {
-      id: 'collection_log',
-      name: 'Collection Log',
-      description: 'Wypełnij wpisy w Collection Log',
-      category: TaskCategory.OTHER,
+      id: 'daily',
+      name: 'Daily',
+      description: 'Complete daily tasks',
+      category: TaskCategory.GRANDEXCHANGE,
       keysRewarded: 1,
       completed: false,
       currentCount: 0,

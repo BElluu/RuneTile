@@ -65,27 +65,30 @@ const GE_ITEMS = [
 
 // Funkcja do pobierania ikony dla typu zadania
 export function getTaskIcon(category: TaskCategory, skillName?: string): string {
-  if (category === TaskCategory.SKILL && skillName) {
-    // Dla zadań SKILL używamy ikony konkretnego skilla
-    // Capitalize pierwszą literę (attack -> Attack)
-    const capitalizedSkill = skillName.charAt(0).toUpperCase() + skillName.slice(1);
-    return `/src/assets/skills/${capitalizedSkill}_icon.png`;
-  }
   
   switch (category) {
     case TaskCategory.SKILL:
-      return '/src/assets/skills/Attack_icon.png'; // Fallback dla skill
+      return getSkillIcon(skillName);
     case TaskCategory.QUEST:
-      return '/src/assets/skills/Prayer_icon.png'; // Używamy ikony quest jako przykład
+      return '/src/assets/tasks/Quest_icon.png';
     case TaskCategory.BOSS:
-      return '/src/assets/skills/Slayer_icon.png'; // Używamy ikony slayer jako przykład
+      return '/src/assets/tasks/Bosses_icon.png';
     case TaskCategory.DROP:
-      return '/src/assets/skills/Thieving_icon.png'; // Używamy ikony thieving jako przykład
-    case TaskCategory.OTHER:
-      return '/src/assets/skills/Crafting_icon.png'; // Używamy ikony crafting jako przykład
+      return '/src/assets/tasks/Drop_icon.png';
+    case TaskCategory.GRANDEXCHANGE:
+      return '/src/assets/tasks/GrandExchange_icon.png';
     default:
       return '/src/assets/skills/Attack_icon.png';
   }
+}
+
+function getSkillIcon(skillName: string | undefined): string {
+  if (!skillName) {
+    return '/src/assets/skills/Attack_icon.png';
+  }
+
+  const capitalizedSkill = skillName.charAt(0).toUpperCase() + skillName.slice(1);
+  return `/src/assets/skills/${capitalizedSkill}_icon.png`;
 }
 
 export async function generateTaskForTile(tileId: string, playerStats: PlayerStats, playerName: string): Promise<GeneratedTask> {
@@ -107,8 +110,8 @@ export async function generateTaskForTile(tileId: string, playerStats: PlayerSta
       return generateBossTask(tileId);
     case TaskCategory.DROP:
       return generateDropTask(tileId);
-    case TaskCategory.OTHER:
-      return generateOtherTask(tileId);
+    case TaskCategory.GRANDEXCHANGE:
+      return generateGrandExchangeTask(tileId);
     case TaskCategory.QUEST:
       return await generateQuestTask(tileId, playerName);
     default:
@@ -281,20 +284,20 @@ function generateDropTask(tileId: string): GeneratedTask {
   };
 }
 
-function generateOtherTask(tileId: string): GeneratedTask {
+function generateGrandExchangeTask(tileId: string): GeneratedTask {
   const item = GE_ITEMS[Math.floor(Math.random() * GE_ITEMS.length)];
   if (!item) {
     // Fallback - spróbuj ponownie
-    return generateOtherTask(tileId);
+    return generateGrandExchangeTask(tileId);
   }
   
   const amount = Math.floor(Math.random() * 50) + 10; // 10-60 items
   
   return {
-    id: `other_${tileId}`,
+    id: `grandexchange_${tileId}`,
     title: `Grand Exchange: ${item}`,
     description: `Buy ${amount} ${item} from the Grand Exchange`,
-    category: TaskCategory.OTHER,
+    category: TaskCategory.GRANDEXCHANGE,
     difficulty: TaskDifficulty.EASY,
     requirements: [{
       type: 'item',
@@ -314,7 +317,7 @@ function generateStartTask(tileId: string): GeneratedTask {
     id: `start_${tileId}`,
     title: 'Start Your Adventure',
     description: 'Use your first key to start adventure',
-    category: TaskCategory.OTHER,
+    category: TaskCategory.GRANDEXCHANGE,
     difficulty: TaskDifficulty.EASY,
     requirements: [{
       type: 'item',

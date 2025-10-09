@@ -80,11 +80,14 @@ export enum TaskDifficulty {
 }
 
 export enum TaskCategory {
+  START = 'start',
   SKILL = 'skill',
   QUEST = 'quest', 
   BOSS = 'boss',
   DROP = 'drop',
-  OTHER = 'other'
+  GRANDEXCHANGE = 'grandexchange',
+  SLAYER = 'slayer',
+  DAILY = 'daily'
 }
 
 export interface GeneratedTask {

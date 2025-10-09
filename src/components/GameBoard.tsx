@@ -360,7 +360,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           </div>
           <div className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center">
             <img 
-              src="/src/assets/gold_icon.png" 
+              src="/src/assets/menu/gold_icon.png" 
               alt="Gold" 
               className="w-6 h-6 mb-1"
             />
@@ -372,7 +372,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             title="Skills"
           >
             <img 
-              src="/src/assets/Stats_icon.png" 
+              src="/src/assets/menu/Stats_icon.png" 
               alt="Stats" 
               className="w-6 h-6 mb-1"
             />
@@ -386,7 +386,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           {/* Daily */}
           <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
             <img 
-              src="/src/assets/Daily_icon.png" 
+              src="/src/assets/menu/Daily_icon.png" 
               alt="Daily" 
               className="w-6 h-6 mb-1"
             />
@@ -399,7 +399,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700"
           >
             <img 
-              src="/src/assets/SlayerMasters_icon.png" 
+              src="/src/assets/menu/SlayerMasters_icon.png" 
               alt="Slayer" 
               className="w-6 h-6 mb-1"
             />
@@ -409,7 +409,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           {/* Bosses */}
           <button className="bg-gray-800 p-3 rounded border-2 border-gray-600 flex flex-col items-center hover:bg-gray-700">
             <img 
-              src="/src/assets/Bosses_icon.png" 
+              src="/src/assets/tasks/Bosses_icon.png" 
               alt="Bosses" 
               className="w-6 h-6 mb-1"
             />
