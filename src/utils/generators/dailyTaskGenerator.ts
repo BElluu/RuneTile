@@ -3,9 +3,7 @@ import { TaskCategory } from '@/types/game';
 import { DAILY_REWARDS } from '@/config/rewards';
 import bossesData from '@/data/bosses.json';
 
-/**
- * Get the current date string (YYYY-MM-DD) for daily task rotation
- */
+
 export function getTodayDateString(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -24,23 +22,19 @@ function seededRandom(seed: string): number {
   return Math.abs(hash) / 2147483647;
 }
 
-/**
- * Get a seeded random element from array
- */
+
 function getSeededRandomElement<T>(array: readonly T[], seed: string): T {
   const index = Math.floor(seededRandom(seed) * array.length);
   return array[index] as T;
 }
 
-/**
- * Generate daily task for a specific difficulty
- */
+
 export function generateDailyTask(difficulty: 'easy' | 'medium' | 'hard' | 'elite', date: string): GeneratedTask {
   const config = DAILY_REWARDS[difficulty];
   const seed = `${date}-${difficulty}`;
   
-  // Determine task type based on difficulty
-  const taskTypes = ['boss', 'skill', 'quest'] as const;
+
+  const taskTypes = ['boss', 'skill', 'grandexchange'] as const;
   const taskType = getSeededRandomElement(taskTypes, seed + '-type');
   
   if (taskType === 'boss') {
@@ -48,7 +42,7 @@ export function generateDailyTask(difficulty: 'easy' | 'medium' | 'hard' | 'elit
   } else if (taskType === 'skill') {
     return generateDailySkillTask(difficulty, config, seed);
   } else {
-    return generateDailyQuestTask(difficulty, config, seed);
+    return generateDailyGrandExchangeTask(difficulty, config, seed);
   }
 }
 
@@ -227,9 +221,61 @@ function generateDailyQuestTask(
   };
 }
 
-/**
- * Generate all daily tasks for today
- */
+function generateDailyGrandExchangeTask(
+  difficulty: 'easy' | 'medium' | 'hard' | 'elite',
+  config: { keysPerTask: number; goldBonus: number },
+  seed: string
+): GeneratedTask {
+  const itemCategories = {
+    easy: ['Logs', 'Fish', 'Ores'],
+    medium: ['Bars', 'Herbs', 'Seeds'],
+    hard: ['Potions', 'Runes', 'Equipment'],
+    elite: ['Dragon items', 'Barrows items', 'God Wars items']
+  } as const;
+  
+  const category = getSeededRandomElement(itemCategories[difficulty], seed + '-cat');
+  
+  const amounts = {
+    easy: [50, 100],
+    medium: [20, 50],
+    hard: [10, 30],
+    elite: [5, 15]
+  } as const;
+  
+  const [min, max] = amounts[difficulty];
+  const amount = min + Math.floor(seededRandom(seed + '-amount') * (max - min + 1));
+  
+  const rewards: TaskReward[] = [
+    {
+      type: 'keys',
+      amount: config.keysPerTask,
+      description: `${config.keysPerTask} Key${config.keysPerTask > 1 ? 's' : ''}`
+    }
+  ];
+  
+  if (config.goldBonus > 0) {
+    rewards.push({
+      type: 'gold',
+      amount: config.goldBonus,
+      description: `${config.goldBonus} Gold`
+    });
+  }
+  
+  return {
+    id: `daily-${difficulty}-${getTodayDateString()}`,
+    category: TaskCategory.GRANDEXCHANGE,
+    difficulty: difficulty.toUpperCase() as TaskDifficulty,
+    description: `Buy ${amount}x ${category} from Grand Exchange`,
+    icon: '/src/assets/tasks/GrandExchange_icon.png',
+    rewards,
+    metadata: {
+      itemCategory: category,
+      amount,
+      isDaily: true
+    }
+  };
+}
+
 export function generateAllDailyTasks(): {
   easy: GeneratedTask;
   medium: GeneratedTask;
