@@ -1,4 +1,4 @@
-# 🎮 RuneTile
+# 🎮 RuneTiles
 
 > A roguelike tile-based progression game inspired by Old School RuneScape
 
@@ -9,9 +9,9 @@
 
 ## 🗺️ About
 
-RuneTile is a unique browser-based game that combines the progression mechanics of Old School RuneScape with roguelike tile exploration. Start at tile (0,0) and unlock adjacent tiles using keys earned from completing tasks. Each tile presents a randomly generated challenge based on your OSRS character's stats!
+RuneTiles is a unique browser-based game that combines the progression mechanics of Old School RuneScape with roguelike tile exploration. Start at tile (0,0) and unlock adjacent tiles using keys earned from completing tasks. Each tile presents a randomly generated challenge based on your OSRS character's stats!
 
-**💡 The Idea**: Born from the desire to break free from the monotony of repetitive OSRS gameplay, RuneTile provides fresh, varied gameplay ideas and goals. Instead of grinding the same content endlessly, let the game surprise you with diverse challenges that encourage you to explore different aspects of Old School RuneScape!
+**💡 The Idea**: Born from the desire to break free from the monotony of repetitive OSRS gameplay, RuneTiles provides fresh, varied gameplay ideas and goals. Instead of grinding the same content endlessly, let the game surprise you with diverse challenges that encourage you to explore different aspects of Old School RuneScape!
 
 ### ✨ Features
 
@@ -44,8 +44,8 @@ RuneTile is a unique browser-based game that combines the progression mechanics 
 
 ```bash
 # Clone the repository
-git clone git@github.com:BElluu/RuneTile.git
-cd RuneTile
+git clone git@github.com:BElluu/RuneTiles.git
+cd RuneTiles
 
 # Install dependencies
 bun install
@@ -128,7 +128,7 @@ Tasks are randomly generated and unique to each tile. They include:
 
 ## 📝 API Integration
 
-RuneTile integrates with official Old School RuneScape APIs:
+RuneTiles integrates with official Old School RuneScape APIs:
 - **Hiscores API**: Fetches player skill levels
 - **RuneMetrics API**: Retrieves quest completion data
 
