@@ -129,7 +129,8 @@ export async function generateInitialGameState(playerName: string, playerStats: 
     visibleTiles: ['0,0'],
     keySources: generateKeySources(),
     tileTasks: { '0,0': startTask },
-    lastUpdated: Date.now()
+    lastUpdated: Date.now(),
+    statsLastFetched: Date.now()
   };
 }
 

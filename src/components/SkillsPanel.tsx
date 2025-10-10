@@ -3,9 +3,10 @@ import type { PlayerStats } from '@/types/game';
 
 interface SkillsPanelProps {
   playerStats: PlayerStats;
+  statsLastFetched?: number;
 }
 
-export function SkillsPanel({ playerStats }: SkillsPanelProps) {
+export function SkillsPanel({ playerStats, statsLastFetched }: SkillsPanelProps) {
   const skills = [
     { name: 'Attack', level: playerStats.attack, icon: '/src/assets/skills/Attack_icon.png' },
     { name: 'Defence', level: playerStats.defence, icon: '/src/assets/skills/Defence_icon.png' },
@@ -32,25 +33,49 @@ export function SkillsPanel({ playerStats }: SkillsPanelProps) {
     { name: 'Construction', level: playerStats.construction, icon: '/src/assets/skills/Construction_icon.png' },
   ];
 
+  const getTimeAgo = (timestamp?: number): string => {
+    if (!timestamp) return 'unknown';
+    
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / (1000 * 60));
+    
+    if (minutes < 1) return 'just now';
+    if (minutes === 1) return '1 minute ago';
+    if (minutes < 60) return `${minutes} minutes ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return '1 hour ago';
+    return `${hours} hours ago`;
+  };
+
   return (
-    <div className="grid grid-cols-3 gap-1">
-      {skills.map((skill, index) => (
-        <div 
-          key={index} 
-          className="flex flex-col items-center p-1 rounded"
-          style={{
-            backgroundColor: '#2d2925',
-            border: '1px solid #4a443f'
-          }}
-        >
-          <img 
-            src={skill.icon} 
-            alt={skill.name} 
-            className="w-5 h-5 mb-1"
-          />
-          <div className="text-xs text-white">{skill.level}</div>
-        </div>
-      ))}
+    <div>
+      <div className="grid grid-cols-3 gap-1">
+        {skills.map((skill, index) => (
+          <div 
+            key={index} 
+            className="flex flex-col items-center p-1 rounded"
+            style={{
+              backgroundColor: '#2d2925',
+              border: '1px solid #4a443f'
+            }}
+          >
+            <img 
+              src={skill.icon} 
+              alt={skill.name} 
+              className="w-5 h-5 mb-1"
+            />
+            <div className="text-xs text-white">{skill.level}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 text-xs text-gray-400 text-center">
+        Last updated: {getTimeAgo(statsLastFetched)}
+      </div>
+      <div className="mt-1 text-xs text-gray-500 text-center">
+        Stats refresh every 15 minutes
+      </div>
     </div>
   );
 }

@@ -145,6 +145,7 @@ export interface GameState {
   keySources: KeySource[];
   tileTasks: Record<string, GeneratedTask>; // tileId -> task
   lastUpdated: number;
+  statsLastFetched?: number;
 }
 
 export interface TilePosition {

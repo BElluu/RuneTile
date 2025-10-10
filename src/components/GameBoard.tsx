@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState } from '@/types/game';
-import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters } from '@/utils/gameStorage';
+import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters, shouldRefreshStats } from '@/utils/gameStorage';
 import { generateVisibleTiles, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
 import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
@@ -119,14 +119,25 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       const savedState = loadGameState();
       
       if (savedState && savedState.playerName === playerName) {
-        const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
-        if (response.ok) {
-          const freshStats = await response.json();
-          updatePlayerStats(freshStats);
-          setGameState({ ...savedState, playerStats: freshStats });
-          setTimeout(() => centerOnLastUnlockedTile(), 100);
+        if (shouldRefreshStats(savedState)) {
+          try {
+            const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);
+            if (response.ok) {
+              const freshStats = await response.json();
+              updatePlayerStats(freshStats);
+              setGameState({ ...savedState, playerStats: freshStats, statsLastFetched: Date.now() });
+              setTimeout(() => centerOnLastUnlockedTile(), 100);
+            } else {
+              console.warn('Failed to refresh stats, using cached data');
+              setGameState(savedState);
+              setTimeout(() => centerOnLastUnlockedTile(), 100);
+            }
+          } catch (fetchError) {
+            console.warn('Error refreshing stats, using cached data:', fetchError);
+            setGameState(savedState);
+            setTimeout(() => centerOnLastUnlockedTile(), 100);
+          }
         } else {
-          console.error('Error fetching character stats');
           setGameState(savedState);
           setTimeout(() => centerOnLastUnlockedTile(), 100);
         }
@@ -447,7 +458,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             }}
           >
             <img 
-              src="/src/assets/key_icon.png" 
+              src="/src/assets/menu/key_icon.png" 
               alt="Key" 
               className="w-6 h-6 mb-1"
             />
@@ -863,7 +874,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       disabled={gameState.keys < 1}
                                     >
                                       <img 
-                                        src="/src/assets/key_icon.png" 
+                                        src="/src/assets/menu/key_icon.png" 
                                         alt="Key" 
                                         className="w-4 h-4"
                                         style={{ imageRendering: 'pixelated' }}
@@ -901,7 +912,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 ×
               </button>
             </div>
-            <SkillsPanel playerStats={gameState.playerStats} />
+            <SkillsPanel playerStats={gameState.playerStats} statsLastFetched={gameState.statsLastFetched} />
           </div>
         </div>
       )}

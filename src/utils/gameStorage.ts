@@ -1,6 +1,7 @@
 import type { GameState, PlayerStats } from '@/types/game';
 
 const GAME_STATE_KEY = 'runeTile_gameState';
+const STATS_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 export function saveGameState(gameState: GameState): void {
   try {
@@ -90,4 +91,13 @@ export function loadSlayerMasters(): any[] | null {
     console.error('Error loading slayer master state:', error);
     return null;
   }
+}
+
+export function shouldRefreshStats(gameState: GameState | null): boolean {
+  if (!gameState || !gameState.statsLastFetched) {
+    return true;
+  }
+  
+  const timeSinceLastFetch = Date.now() - gameState.statsLastFetched;
+  return timeSinceLastFetch >= STATS_REFRESH_INTERVAL;
 }
