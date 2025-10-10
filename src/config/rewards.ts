@@ -45,10 +45,10 @@ export const QUEST_REWARDS = {
 
 // Mapping QP to difficulty
 export const QUEST_DIFFICULTY_THRESHOLDS = {
-  easy: 2,    // 0-2 QP
-  medium: 5,  // 3-5 QP
-  hard: 10,   // 6-10 QP
-  elite: 11,  // 11+ QP
+  easy: 0,    // 0-1 QP (miniquests, tutorial, most quests)
+  medium: 2,  // 2 QP (intermediate)
+  hard: 3,    // 3 QP (hard quests)
+  elite: 4,   // 4-5 QP (grandmaster quests)
 } as const;
 
 // ============================================
