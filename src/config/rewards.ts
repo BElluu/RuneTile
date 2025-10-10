@@ -11,27 +11,27 @@ import { TaskDifficulty } from '@/types/game';
 export const BOSS_REWARDS = {
   low: {
     difficulty: TaskDifficulty.EASY,
-    killCount: [5, 20] as [number, number],
-    goldPerKill: 30,
+    killCount: [10, 25] as [number, number],
+    goldPerKill: 15,
     keysPerTask: 0,
   },
   mid: {
     difficulty: TaskDifficulty.MEDIUM,
-    killCount: [3, 15] as [number, number],
-    goldPerKill: 65,
+    killCount: [5, 15] as [number, number],
+    goldPerKill: 40,
     keysPerTask: 0,
   },
   high: {
     difficulty: TaskDifficulty.HARD,
-    killCount: [2, 10] as [number, number],
-    goldPerKill: 200,
+    killCount: [3, 8] as [number, number],
+    goldPerKill: 100,
     keysPerTask: 0,
   },
   elite: {
     difficulty: TaskDifficulty.ELITE,
-    killCount: [1, 5] as [number, number],
-    goldPerKill: 350,
-    keysPerTask: 0,
+    killCount: [1, 3] as [number, number],
+    goldPerKill: 400,
+    keysPerTask: 1,
   },
 } as const;
 
@@ -40,7 +40,7 @@ export const BOSS_REWARDS = {
 // ============================================
 export const QUEST_REWARDS = {
   keysPerTask: 1,
-  goldBonus: 20,
+  goldBonus: 100,
 } as const;
 
 // Mapping QP to difficulty
@@ -71,30 +71,30 @@ export const SKILL_DIFFICULTY_THRESHOLDS = {
 // GRAND EXCHANGE TASKS
 // ============================================
 export const GE_REWARDS = {
-  keysPerTask: 1,
-  goldBonus: 0,
+  keysPerTask: 0,
+  goldBonus: 150,
   itemAmount: [10, 60] as [number, number],
 } as const;
 
 // ============================================
-// SLAYER TASKS (TODO)
+// SLAYER TASKS
 // ============================================
 export const SLAYER_REWARDS = {
   // Number of tasks required for each master's reward
   tasksRequired: {
-    turael: 5,
-    spria: 5,
-    mazchna: 5,
-    vannaka: 5,
-    chaeldar: 5,
-    duradel: 5,
+    turael: 10,      // Easy master = more tasks
+    spria: 10,
+    mazchna: 8,
+    vannaka: 7,
+    chaeldar: 6,
+    duradel: 5,      // Hard master = fewer tasks
     nieve: 5,
-    konar: 5,
-    krystilia: 5,
+    konar: 4,        // Special master = even fewer
+    krystilia: 3,    // Wilderness = dangerous but rewarding
   },
   // Rewards for completing the required number of tasks
   keysPerMilestone: 1,
-  goldBonus: 22,
+  goldBonus: 200,
 } as const;
 
 // ============================================
@@ -127,8 +127,8 @@ export const DAILY_REWARDS = {
 // START TASK REWARDS
 // ============================================
 export const START_TASK_REWARDS = {
-  keysPerTask: 1,
-  goldBonus: 10,
+  keysPerTask: 2,
+  goldBonus: 50,
 } as const;
 
 // ============================================
@@ -136,6 +136,6 @@ export const START_TASK_REWARDS = {
 // ============================================
 export const STARTING_RESOURCES = {
   keys: 1,
-  gold: 0,
+  gold: 100,
 } as const;
 

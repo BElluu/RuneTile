@@ -25,10 +25,10 @@ SKILL_REWARDS = {
   goldBonus: 0       // 0 = no gold
 }
 
-// Grand Exchange Tasks - rewards for complete
+// Grand Exchange Tasks - reward for buying items in OSRS
 GE_REWARDS = {
-  keysPerTask: 1,
-  goldBonus: 0
+  keysPerTask: 0,      // No keys (easier tasks)
+  goldBonus: 150       // Gold reward for effort
 }
 
 // Slayer Tasks - rewards for slayer masters
@@ -146,8 +146,8 @@ export const STARTING_RESOURCES = {
 - `goldBonus` - bonus gold
 
 ### 🛒 Grand Exchange Tasks
-- `keysPerTask` - keys per purchase
-- `goldBonus` - gold cost (0 = no cost)
+- `keysPerTask` - keys reward (usually 0)
+- `goldBonus` - gold reward for buying items in OSRS
 - `itemAmount` - item amount range [min, max]
 
 ### 🎯 Slayer Tasks
