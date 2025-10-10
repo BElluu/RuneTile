@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { APP_VERSION } from '@/config/version';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -93,6 +94,13 @@ export function SettingsModal({
               >
                 Reset Progress
               </button>
+            </div>
+
+            {/* Version Display */}
+            <div className="pt-4 border-t text-center" style={{ borderColor: '#4a443f' }}>
+              <span className="text-gray-400 text-xs">
+                Version {APP_VERSION}
+              </span>
             </div>
           </div>
         ) : (

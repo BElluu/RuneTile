@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState } from '@/types/game';
-import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters, shouldRefreshStats } from '@/utils/gameStorage';
+import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters, shouldRefreshStats, getLastSeenVersion, saveLastSeenVersion } from '@/utils/gameStorage';
 import { generateVisibleTiles, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
 import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
 import { SettingsModal } from './SettingsModal';
+import { ChangelogModal } from './ChangelogModal';
 import { SLAYER_REWARDS } from '@/config/rewards';
+import { APP_VERSION, getChangelogSince, compareVersions } from '@/config/version';
 
 interface GameBoardProps {
   playerName: string;
@@ -24,6 +26,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showSlayerModal, setShowSlayerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showChangelogModal, setShowChangelogModal] = useState(false);
+  const [pendingChangelog, setPendingChangelog] = useState<ReturnType<typeof getChangelogSince>>([]);
   const [useRunescapeFont, setUseRunescapeFont] = useState(() => {
     const saved = localStorage.getItem('useRunescapeFont');
     return saved !== null ? saved === 'true' : true;
@@ -56,6 +60,19 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     if (savedSlayerMasters) {
       setSlayerMasters(savedSlayerMasters);
     }
+
+    // Check version and show changelog if needed
+    const lastSeenVersion = getLastSeenVersion();
+    if (lastSeenVersion && compareVersions(APP_VERSION, lastSeenVersion) > 0) {
+      // New version detected, show changelog
+      const changelog = getChangelogSince(lastSeenVersion);
+      if (changelog.length > 0) {
+        setPendingChangelog(changelog);
+        setShowChangelogModal(true);
+      }
+    }
+    // Always save current version (even for first-time users)
+    saveLastSeenVersion(APP_VERSION);
 
     return () => {
       if (hoverTimeoutRef.current) {
@@ -951,6 +968,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         onFontChange={setUseRunescapeFont}
         onResetProgress={handleResetProgress}
       />
+
+      {/* Changelog Modal */}
+      {showChangelogModal && (
+        <ChangelogModal
+          changelog={pendingChangelog}
+          onClose={() => setShowChangelogModal(false)}
+        />
+      )}
             </div>
           );
         }

@@ -2,6 +2,7 @@ import type { GameState, PlayerStats } from '@/types/game';
 import { SLAYER_REWARDS } from '@/config/rewards';
 
 const GAME_STATE_KEY = 'runeTiles_gameState';
+const VERSION_KEY = 'runeTiles_version';
 const STATS_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 export function saveGameState(gameState: GameState): void {
@@ -132,4 +133,25 @@ export function shouldRefreshStats(gameState: GameState | null): boolean {
   
   const timeSinceLastFetch = Date.now() - gameState.statsLastFetched;
   return timeSinceLastFetch >= STATS_REFRESH_INTERVAL;
+}
+
+// ============================================
+// VERSION MANAGEMENT
+// ============================================
+
+export function getLastSeenVersion(): string | null {
+  try {
+    return localStorage.getItem(VERSION_KEY);
+  } catch (error) {
+    console.error('Error loading version:', error);
+    return null;
+  }
+}
+
+export function saveLastSeenVersion(version: string): void {
+  try {
+    localStorage.setItem(VERSION_KEY, version);
+  } catch (error) {
+    console.error('Error saving version:', error);
+  }
 }
