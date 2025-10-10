@@ -1,8 +1,9 @@
 import React from 'react';
-import type { VersionInfo } from '@/config/version';
+import type { ChangelogEntry } from '@/config/version';
+import { APP_VERSION } from '@/config/version';
 
 interface ChangelogModalProps {
-  changelog: VersionInfo[];
+  changelog: ChangelogEntry[];
   onClose: () => void;
 }
 
@@ -44,66 +45,53 @@ export function ChangelogModal({ changelog, onClose }: ChangelogModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            🎉 What's New!
+        <div className="flex items-center gap-3 pb-3 mb-6 border-b" style={{ borderColor: '#4a443f' }}>
+          <h2 className="text-2xl font-bold text-white">
+            🎉 What's New in v{APP_VERSION}
           </h2>
         </div>
 
-        {/* Changelog Entries */}
-        <div className="space-y-6">
-          {changelog.map((entry) => (
-            <div key={entry.version} className="space-y-3">
-              {/* Version Header */}
-              <div className="flex items-center gap-3 pb-2 border-b" style={{ borderColor: '#4a443f' }}>
-                <span className="text-xl font-bold text-white">
-                  v{entry.version}
+        {/* Changes List */}
+        <ul className="space-y-3">
+          {changelog.map((change, idx) => (
+            <li key={idx} className="flex items-start gap-3 text-sm">
+              <span className="text-xl mt-0.5">
+                {CATEGORY_ICONS[change.category]}
+              </span>
+              <div className="flex-1">
+                <span 
+                  className="font-semibold"
+                  style={{ color: CATEGORY_COLORS[change.category] }}
+                >
+                  {CATEGORY_LABELS[change.category]}:
                 </span>
-                <span className="text-sm text-gray-400">
-                  {new Date(entry.releaseDate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                <span className="text-gray-300 ml-2">
+                  {change.description}
                 </span>
               </div>
-
-              {/* Changes List */}
-              <ul className="space-y-2">
-                {entry.changes.map((change, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm">
-                    <span className="text-lg mt-0.5">
-                      {CATEGORY_ICONS[change.category]}
-                    </span>
-                    <div className="flex-1">
-                      <span 
-                        className="font-semibold"
-                        style={{ color: CATEGORY_COLORS[change.category] }}
-                      >
-                        {CATEGORY_LABELS[change.category]}:
-                      </span>
-                      <span className="text-gray-300 ml-2">
-                        {change.description}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
 
         {/* Footer */}
         <div className="mt-6 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 text-white rounded transition-colors border"
+            className="w-full px-4 py-2 text-white rounded transition-all duration-200 border font-semibold"
             style={{
               background: 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
               borderColor: '#3D2F24'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6a5344'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(180deg, #9d8161 0%, #6a5344 50%, #4a3829 100%)';
+              e.currentTarget.style.transform = 'scale(1.02)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
             Got it!
           </button>

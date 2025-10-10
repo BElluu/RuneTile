@@ -7,6 +7,7 @@ interface SettingsModalProps {
   useRunescapeFont: boolean;
   onFontChange: (useRunescapeFont: boolean) => void;
   onResetProgress: () => void;
+  onViewChangelog: () => void;
 }
 
 export function SettingsModal({ 
@@ -14,9 +15,20 @@ export function SettingsModal({
   onClose, 
   useRunescapeFont, 
   onFontChange,
-  onResetProgress 
+  onResetProgress,
+  onViewChangelog
 }: SettingsModalProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [enableAnimations, setEnableAnimations] = useState(false);
+
+  // Enable animations after component mounts/changes to prevent resize glitch
+  React.useEffect(() => {
+    setEnableAnimations(false);
+    const timer = setTimeout(() => {
+      setEnableAnimations(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [showResetConfirm]);
 
   if (!isOpen) return null;
 
@@ -79,18 +91,60 @@ export function SettingsModal({
               </div>
             </div>
 
+            {/* Changelog Button */}
+            <div className="space-y-2 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
+              <label className="text-white text-sm font-semibold">What's New</label>
+              <button
+                onClick={() => {
+                  onViewChangelog();
+                  onClose();
+                }}
+                className="w-full px-4 py-2 text-white rounded text-sm border"
+                style={{
+                  background: 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+                  borderColor: '#3D2F24',
+                  transition: 'transform 0.2s, background 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #9d8161 0%, #6a5344 50%, #4a3829 100%)';
+                    e.currentTarget.style.transform = 'scale(1.01)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }
+                }}
+              >
+                📋 View Changelog
+              </button>
+            </div>
+
             {/* Reset Progress Button */}
             <div className="space-y-2 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
               <label className="text-white text-sm font-semibold">Reset Progress</label>
               <button
                 onClick={handleResetClick}
-                className="w-full px-4 py-2 text-white rounded text-sm transition-colors border"
+                className="w-full px-4 py-2 text-white rounded text-sm border"
                 style={{
                   background: 'linear-gradient(180deg, #8B4545 0%, #5C3A3A 50%, #3D2424 100%)',
-                  borderColor: '#3D2424'
+                  borderColor: '#3D2424',
+                  transition: 'transform 0.2s, background 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6a4444'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(180deg, #8B4545 0%, #5C3A3A 50%, #3D2424 100%)'}
+                onMouseEnter={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #9d5151 0%, #6a4444 50%, #4a2929 100%)';
+                    e.currentTarget.style.transform = 'scale(1.01)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #8B4545 0%, #5C3A3A 50%, #3D2424 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }
+                }}
               >
                 Reset Progress
               </button>
@@ -116,25 +170,47 @@ export function SettingsModal({
             <div className="flex space-x-3 pt-4">
               <button
                 onClick={handleCancelReset}
-                className="flex-1 px-4 py-2 text-white rounded text-sm transition-colors border"
+                className="flex-1 px-4 py-2 text-white rounded text-sm border"
                 style={{
                   background: 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
-                  borderColor: '#3D2F24'
+                  borderColor: '#3D2F24',
+                  transition: 'transform 0.2s, background 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6a5344'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)'}
+                onMouseEnter={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #9d8161 0%, #6a5344 50%, #4a3829 100%)';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmReset}
-                className="flex-1 px-4 py-2 text-white rounded text-sm transition-colors border"
+                className="flex-1 px-4 py-2 text-white rounded text-sm border"
                 style={{
                   background: 'linear-gradient(180deg, #8B4545 0%, #5C3A3A 50%, #3D2424 100%)',
-                  borderColor: '#3D2424'
+                  borderColor: '#3D2424',
+                  transition: 'transform 0.2s, background 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6a4444'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(180deg, #8B4545 0%, #5C3A3A 50%, #3D2424 100%)'}
+                onMouseEnter={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #9d5151 0%, #6a4444 50%, #4a2929 100%)';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #8B4545 0%, #5C3A3A 50%, #3D2424 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }
+                }}
               >
                 Confirm Reset
               </button>

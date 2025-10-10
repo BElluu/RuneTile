@@ -8,7 +8,7 @@ import { SlayerMastersPanel } from './SlayerMastersPanel';
 import { SettingsModal } from './SettingsModal';
 import { ChangelogModal } from './ChangelogModal';
 import { SLAYER_REWARDS } from '@/config/rewards';
-import { APP_VERSION, getChangelogSince, compareVersions } from '@/config/version';
+import { APP_VERSION, CURRENT_CHANGELOG } from '@/config/version';
 
 interface GameBoardProps {
   playerName: string;
@@ -27,7 +27,6 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [showSlayerModal, setShowSlayerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
-  const [pendingChangelog, setPendingChangelog] = useState<ReturnType<typeof getChangelogSince>>([]);
   const [useRunescapeFont, setUseRunescapeFont] = useState(() => {
     const saved = localStorage.getItem('useRunescapeFont');
     return saved !== null ? saved === 'true' : true;
@@ -63,16 +62,10 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
     // Check version and show changelog if needed
     const lastSeenVersion = getLastSeenVersion();
-    if (lastSeenVersion && compareVersions(APP_VERSION, lastSeenVersion) > 0) {
-      // New version detected, show changelog
-      const changelog = getChangelogSince(lastSeenVersion);
-      if (changelog.length > 0) {
-        setPendingChangelog(changelog);
-        setShowChangelogModal(true);
-      }
+    if (lastSeenVersion !== APP_VERSION) {
+      setShowChangelogModal(true);
+      saveLastSeenVersion(APP_VERSION);
     }
-    // Always save current version (even for first-time users)
-    saveLastSeenVersion(APP_VERSION);
 
     return () => {
       if (hoverTimeoutRef.current) {
@@ -967,12 +960,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         useRunescapeFont={useRunescapeFont}
         onFontChange={setUseRunescapeFont}
         onResetProgress={handleResetProgress}
+        onViewChangelog={() => setShowChangelogModal(true)}
       />
 
       {/* Changelog Modal */}
       {showChangelogModal && (
         <ChangelogModal
-          changelog={pendingChangelog}
+          changelog={CURRENT_CHANGELOG}
           onClose={() => setShowChangelogModal(false)}
         />
       )}
