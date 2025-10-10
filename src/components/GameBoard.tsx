@@ -6,6 +6,7 @@ import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
 import { SettingsModal } from './SettingsModal';
+import { SLAYER_REWARDS } from '@/config/rewards';
 
 interface GameBoardProps {
   playerName: string;
@@ -34,15 +35,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const gameBoardRef = React.useRef<HTMLDivElement>(null);
   const wheelListenerRef = React.useRef<((e: Event) => void) | null>(null);
   const [slayerMasters, setSlayerMasters] = useState([
-    { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Mazchna', image: '/src/assets/slayer_masters/Mazchna_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Vannaka', image: '/src/assets/slayer_masters/Vannaka_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Chaeldar', image: '/src/assets/slayer_masters/Chaeldar_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Duradel', image: '/src/assets/slayer_masters/Duradel_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Nieve', image: '/src/assets/slayer_masters/Nieve_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Konar', image: '/src/assets/slayer_masters/Konar_head.png', tasksCompleted: 0, requiredTasks: 5 },
-    { name: 'Krystilia', image: '/src/assets/slayer_masters/Krystilia_head.png', tasksCompleted: 0, requiredTasks: 5 },
+    { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.turael },
+    { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.spria },
+    { name: 'Mazchna', image: '/src/assets/slayer_masters/Mazchna_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.mazchna },
+    { name: 'Vannaka', image: '/src/assets/slayer_masters/Vannaka_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.vannaka },
+    { name: 'Chaeldar', image: '/src/assets/slayer_masters/Chaeldar_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.chaeldar },
+    { name: 'Duradel', image: '/src/assets/slayer_masters/Duradel_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.duradel },
+    { name: 'Nieve', image: '/src/assets/slayer_masters/Nieve_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.nieve },
+    { name: 'Konar', image: '/src/assets/slayer_masters/Konar_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.konar },
+    { name: 'Krystilia', image: '/src/assets/slayer_masters/Krystilia_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.krystilia },
   ]);
 
   useEffect(() => {
@@ -196,32 +197,25 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     if (!gameState) return;
     
     const task = gameState.tileTasks[tileId];
-    let goldReward = 100;
+    if (!task) return;
     
-    if (task) {
-      switch (task.difficulty) {
-        case 'easy':
-          goldReward = 50;
-          break;
-        case 'medium':
-          goldReward = 150;
-          break;
-        case 'hard':
-          goldReward = 300;
-          break;
-        case 'elite':
-          goldReward = 500;
-          break;
-        case 'master':
-          goldReward = 1000;
-          break;
+    // Calculate rewards from task
+    let goldReward = 0;
+    let keysReward = 0;
+    
+    task.rewards.forEach(reward => {
+      if (reward.type === 'gold') {
+        goldReward += reward.amount;
+      } else if (reward.type === 'keys') {
+        keysReward += reward.amount;
       }
-    }
+    });
     
     const newGameState = {
       ...gameState,
       completedTiles: [...gameState.completedTiles, tileId],
-      gold: gameState.gold + goldReward
+      gold: gameState.gold + goldReward,
+      keys: gameState.keys + keysReward
     };
     
     setGameState(newGameState);
@@ -263,9 +257,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           const isCompleted = newCount >= master.requiredTasks;
           
           if (isCompleted) {
+            // Calculate rewards from config
+            const keysReward = SLAYER_REWARDS.keysPerMilestone;
+            const goldReward = SLAYER_REWARDS.goldBonus;
+            
             const newGameState = {
               ...gameState,
-              keys: gameState.keys + 1
+              keys: gameState.keys + keysReward,
+              gold: gameState.gold + goldReward
             };
             setGameState(newGameState);
             saveGameState(newGameState);

@@ -1,6 +1,8 @@
 import type { Tile, GameState, TilePosition, PlayerStats, Task } from '@/types/game';
-import { TaskCategory, TaskDifficulty, RewardType } from '@/types/game';
+import { TaskCategory } from '@/types/game';
 import { generateTaskForTile } from './taskGenerator';
+import { STARTING_RESOURCES } from '@/config/rewards';
+import { generateStartTask } from './generators/otherTaskGenerator';
 
 // Generate infinite grid of tiles - only visible tiles
 export function generateVisibleTiles(gameState: GameState): TilePosition[] {
@@ -100,30 +102,14 @@ function getNeighborPositions(x: number, y: number): TilePosition[] {
 }
 
 export async function generateInitialGameState(playerName: string, playerStats: PlayerStats): Promise<GameState> {
-  // Generate start task for tile (0,0)
-  const startTask = {
-    id: `start_0,0`,
-    title: 'Start Your Adventure',
-    description: 'Use your first key to start adventure',
-    category: TaskCategory.START,
-    difficulty: TaskDifficulty.EASY,
-    requirements: [{
-      type: 'item' as const,
-      target: 'key',
-      amount: 1
-    }],
-    rewards: [{
-      type: RewardType.GOLD,
-      amount: 0,
-      description: 'Begin your journey'
-    }]
-  };
+  // Generate start task for tile (0,0) using the generator
+  const startTask = generateStartTask('0,0');
 
   return {
     playerName,
     playerStats,
-    keys: 1,
-    gold: 0,
+    keys: STARTING_RESOURCES.keys,
+    gold: STARTING_RESOURCES.gold,
     unlockedTiles: [],
     completedTiles: [],
     visibleTiles: ['0,0'],

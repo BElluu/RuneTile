@@ -1,4 +1,5 @@
 import type { GameState, PlayerStats } from '@/types/game';
+import { SLAYER_REWARDS } from '@/config/rewards';
 
 const GAME_STATE_KEY = 'runeTiles_gameState';
 const STATS_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
@@ -86,7 +87,38 @@ export function saveSlayerMasters(slayerMasters: any[]): void {
 export function loadSlayerMasters(): any[] | null {
   try {
     const data = localStorage.getItem('runeTiles_slayerMasters');
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    
+    const savedMasters = JSON.parse(data);
+    
+    // Migrate requiredTasks to match current config
+    const migratedMasters = savedMasters.map((master: any) => {
+      const masterKey = master.name.toLowerCase() as keyof typeof SLAYER_REWARDS.tasksRequired;
+      const configuredRequired = SLAYER_REWARDS.tasksRequired[masterKey];
+      
+      // If config has changed, update requiredTasks but keep tasksCompleted
+      if (configuredRequired !== undefined && master.requiredTasks !== configuredRequired) {
+        // If player had more completed than new requirement, reset to avoid issues
+        const tasksCompleted = master.tasksCompleted >= configuredRequired 
+          ? 0 
+          : master.tasksCompleted;
+        
+        return {
+          ...master,
+          requiredTasks: configuredRequired,
+          tasksCompleted
+        };
+      }
+      
+      return master;
+    });
+    
+    // Save migrated data back to localStorage
+    if (JSON.stringify(savedMasters) !== JSON.stringify(migratedMasters)) {
+      saveSlayerMasters(migratedMasters);
+    }
+    
+    return migratedMasters;
   } catch (error) {
     console.error('Error loading slayer master state:', error);
     return null;
