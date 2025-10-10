@@ -234,7 +234,7 @@ function generateKeySources() {
       id: 'daily',
       name: 'Daily',
       description: 'Complete daily tasks',
-      category: TaskCategory.GRANDEXCHANGE,
+      category: TaskCategory.DAILY,
       keysRewarded: 1,
       completed: false,
       currentCount: 0,

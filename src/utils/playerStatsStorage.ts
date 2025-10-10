@@ -31,7 +31,7 @@ export interface SavedPlayerData {
   timestamp: number;
 }
 
-const STORAGE_KEY = 'runeTile_playerStats';
+const STORAGE_KEY = 'runeTiles_playerStats';
 
 export function savePlayerStats(playerName: string, stats: PlayerStats): void {
   try {

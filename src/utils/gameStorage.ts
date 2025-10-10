@@ -1,6 +1,6 @@
 import type { GameState, PlayerStats } from '@/types/game';
 
-const GAME_STATE_KEY = 'runeTile_gameState';
+const GAME_STATE_KEY = 'runeTiles_gameState';
 const STATS_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 export function saveGameState(gameState: GameState): void {
@@ -77,7 +77,7 @@ export function importGameState(jsonData: string): boolean {
 
 export function saveSlayerMasters(slayerMasters: any[]): void {
   try {
-    localStorage.setItem('runeTile_slayerMasters', JSON.stringify(slayerMasters));
+    localStorage.setItem('runeTiles_slayerMasters', JSON.stringify(slayerMasters));
   } catch (error) {
     console.error('Error saving slayer master state:', error);
   }
@@ -85,7 +85,7 @@ export function saveSlayerMasters(slayerMasters: any[]): void {
 
 export function loadSlayerMasters(): any[] | null {
   try {
-    const data = localStorage.getItem('runeTile_slayerMasters');
+    const data = localStorage.getItem('runeTiles_slayerMasters');
     return data ? JSON.parse(data) : null;
   } catch (error) {
     console.error('Error loading slayer master state:', error);
