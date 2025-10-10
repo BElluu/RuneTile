@@ -1,5 +1,7 @@
 <div align="center">
+  <a href="https://runetiles.app">
   <img src="https://github.com/BElluu/RuneTiles/blob/master/src/assets/rune_tiles_logo_nobc.png" alt="RuneTiles Logo" width="400"/>
+  </a>
 </div>
 
 > A roguelike tile-based progression game inspired by Old School RuneScape
