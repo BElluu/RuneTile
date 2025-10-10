@@ -7,8 +7,12 @@ import { SkillsPanel } from './SkillsPanel';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
 import { SettingsModal } from './SettingsModal';
 import { ChangelogModal } from './ChangelogModal';
+import { ShopModal } from './ShopModal';
+import { DailyTasksModal } from './DailyTasksModal';
 import { SLAYER_REWARDS } from '@/config/rewards';
 import { APP_VERSION, CURRENT_CHANGELOG } from '@/config/version';
+import { generateAllDailyTasks, getTodayDateString } from '@/utils/generators/dailyTaskGenerator';
+import { resetDailyTasksIfNewDay, saveDailyTasks, type DailyTasksState } from '@/utils/gameStorage';
 
 interface GameBoardProps {
   playerName: string;
@@ -27,6 +31,12 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [showSlayerModal, setShowSlayerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
+  const [showShopModal, setShowShopModal] = useState(false);
+  const [showDailyModal, setShowDailyModal] = useState(false);
+  const [dailyTasks, setDailyTasks] = useState(generateAllDailyTasks());
+  const [dailyTasksState, setDailyTasksState] = useState<DailyTasksState>(() => 
+    resetDailyTasksIfNewDay(getTodayDateString())
+  );
   const [useRunescapeFont, setUseRunescapeFont] = useState(() => {
     const saved = localStorage.getItem('useRunescapeFont');
     return saved !== null ? saved === 'true' : true;
@@ -84,6 +94,23 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     }
     localStorage.setItem('useRunescapeFont', String(useRunescapeFont));
   }, [useRunescapeFont]);
+
+  // Check for new day and reset daily tasks
+  useEffect(() => {
+    const checkDailyReset = () => {
+      const today = getTodayDateString();
+      if (dailyTasksState.date !== today) {
+        const newState = resetDailyTasksIfNewDay(today);
+        setDailyTasksState(newState);
+        setDailyTasks(generateAllDailyTasks());
+      }
+    };
+
+    // Check on mount and every minute
+    checkDailyReset();
+    const interval = setInterval(checkDailyReset, 60000);
+    return () => clearInterval(interval);
+  }, [dailyTasksState.date]);
 
   useEffect(() => {
     if (!gameState) return;
@@ -330,6 +357,56 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     window.location.reload();
   };
 
+  const handlePurchase = (itemType: 'key', amount: number, cost: number) => {
+    if (!gameState) return;
+    
+    if (gameState.gold >= cost) {
+      const updatedState = {
+        ...gameState,
+        gold: gameState.gold - cost,
+        keys: gameState.keys + amount
+      };
+      setGameState(updatedState);
+      saveGameState(updatedState);
+      setShowShopModal(false);
+    }
+  };
+
+  const handleCompleteDailyTask = (difficulty: 'easy' | 'medium' | 'hard' | 'elite') => {
+    if (!gameState || dailyTasksState.completedTasks[difficulty]) return;
+
+    const task = dailyTasks[difficulty];
+    
+    let goldReward = 0;
+    let keysReward = 0;
+    
+    task.rewards.forEach(reward => {
+      if (reward.type === 'gold') {
+        goldReward += reward.amount;
+      } else if (reward.type === 'keys') {
+        keysReward += reward.amount;
+      }
+    });
+
+    const updatedGameState = {
+      ...gameState,
+      gold: gameState.gold + goldReward,
+      keys: gameState.keys + keysReward
+    };
+    setGameState(updatedGameState);
+    saveGameState(updatedGameState);
+
+    const updatedDailyState = {
+      ...dailyTasksState,
+      completedTasks: {
+        ...dailyTasksState.completedTasks,
+        [difficulty]: true
+      }
+    };
+    setDailyTasksState(updatedDailyState);
+    saveDailyTasks(updatedDailyState);
+  };
+
 
   if (error) {
     return (
@@ -473,12 +550,16 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             />
             <div className="text-white font-bold text-lg">{gameState.keys}</div>
           </div>
-          <div 
-            className="p-3 rounded border-2 flex flex-col items-center"
+          <button
+            onClick={() => setShowShopModal(true)}
+            className="p-3 rounded border-2 flex flex-col items-center transition-colors cursor-pointer"
             style={{
               backgroundColor: '#3a3530',
               borderColor: '#574f47'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+            title="Open Shop"
           >
             <img 
               src="/src/assets/menu/gold_icon.png" 
@@ -486,7 +567,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
               className="w-6 h-6 mb-1"
             />
             <div className="text-white font-bold text-lg">{gameState.gold.toLocaleString()}</div>
-          </div>
+          </button>
           <button
             onClick={() => setShowSkillsModal(!showSkillsModal)}
             className="p-3 rounded border-2 flex flex-col items-center transition-colors"
@@ -512,6 +593,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         <div className="absolute left-4 top-32 z-10 flex flex-col gap-2">
           {/* Daily */}
           <button 
+            onClick={() => setShowDailyModal(true)}
             className="p-3 rounded border-2 flex flex-col items-center transition-colors"
             style={{
               backgroundColor: '#3a3530',
@@ -971,6 +1053,24 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           onClose={() => setShowChangelogModal(false)}
         />
       )}
+
+      {/* Shop Modal */}
+      <ShopModal
+        isOpen={showShopModal}
+        onClose={() => setShowShopModal(false)}
+        currentGold={gameState.gold}
+        currentKeys={gameState.keys}
+        onPurchase={handlePurchase}
+      />
+
+      {/* Daily Tasks Modal */}
+      <DailyTasksModal
+        isOpen={showDailyModal}
+        onClose={() => setShowDailyModal(false)}
+        tasks={dailyTasks}
+        completedTasks={dailyTasksState.completedTasks}
+        onCompleteTask={handleCompleteDailyTask}
+      />
             </div>
           );
         }

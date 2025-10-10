@@ -90,13 +90,15 @@ export enum TaskCategory {
 
 export interface GeneratedTask {
   id: string;
-  title: string;
+  title?: string;
   description: string;
   category: TaskCategory;
   difficulty: TaskDifficulty;
-  requirements: TaskRequirement[];
+  icon?: string;
+  requirements?: TaskRequirement[];
   rewards: TaskReward[];
   skillName?: string;
+  metadata?: any;
 }
 
 export interface TaskRequirement {

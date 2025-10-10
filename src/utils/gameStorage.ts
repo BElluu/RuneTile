@@ -3,6 +3,7 @@ import { SLAYER_REWARDS } from '@/config/rewards';
 
 const GAME_STATE_KEY = 'runeTiles_gameState';
 const VERSION_KEY = 'runeTiles_version';
+const DAILY_TASKS_KEY = 'runeTiles_dailyTasks';
 const STATS_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 export function saveGameState(gameState: GameState): void {
@@ -154,4 +155,57 @@ export function saveLastSeenVersion(version: string): void {
   } catch (error) {
     console.error('Error saving version:', error);
   }
+}
+
+// ============================================
+// DAILY TASKS MANAGEMENT
+// ============================================
+
+export interface DailyTasksState {
+  date: string; // YYYY-MM-DD format
+  completedTasks: {
+    easy: boolean;
+    medium: boolean;
+    hard: boolean;
+    elite: boolean;
+  };
+}
+
+export function loadDailyTasks(): DailyTasksState | null {
+  try {
+    const data = localStorage.getItem(DAILY_TASKS_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error loading daily tasks:', error);
+    return null;
+  }
+}
+
+export function saveDailyTasks(dailyTasks: DailyTasksState): void {
+  try {
+    localStorage.setItem(DAILY_TASKS_KEY, JSON.stringify(dailyTasks));
+  } catch (error) {
+    console.error('Error saving daily tasks:', error);
+  }
+}
+
+export function resetDailyTasksIfNewDay(currentDate: string): DailyTasksState {
+  const saved = loadDailyTasks();
+  
+  // If no saved data or it's a new day, reset
+  if (!saved || saved.date !== currentDate) {
+    const newState: DailyTasksState = {
+      date: currentDate,
+      completedTasks: {
+        easy: false,
+        medium: false,
+        hard: false,
+        elite: false
+      }
+    };
+    saveDailyTasks(newState);
+    return newState;
+  }
+  
+  return saved;
 }

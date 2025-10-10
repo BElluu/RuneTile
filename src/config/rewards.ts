@@ -120,32 +120,6 @@ export const SLAYER_REWARDS = {
 } as const;
 
 // ============================================
-// DAILY TASKS (TODO)
-// ============================================
-export const DAILY_REWARDS = {
-  [TaskDifficulty.EASY]: {
-    keysPerTask: 0,
-    goldBonus: 20,
-  },
-  [TaskDifficulty.MEDIUM]: {
-    keysPerTask: 0,
-    goldBonus: 40,
-  },
-  [TaskDifficulty.HARD]: {
-    keysPerTask: 1,
-    goldBonus: 80,
-  },
-  [TaskDifficulty.ELITE]: {
-    keysPerTask: 2,
-    goldBonus: 160,
-  },
-  [TaskDifficulty.MASTER]: {
-    keysPerTask: 3,
-    goldBonus: 320,
-  },
-} as const;
-
-// ============================================
 // START TASK REWARDS
 // ============================================
 export const START_TASK_REWARDS = {
@@ -159,5 +133,28 @@ export const START_TASK_REWARDS = {
 export const STARTING_RESOURCES = {
   keys: 1,
   gold: 100,
+} as const;
+
+// ============================================
+// DAILY TASKS CONFIGURATION
+// ============================================
+
+export const DAILY_REWARDS = {
+  easy: {
+    keysPerTask: 1,
+    goldBonus: 50,
+  },
+  medium: {
+    keysPerTask: 2,
+    goldBonus: 150,
+  },
+  hard: {
+    keysPerTask: 3,
+    goldBonus: 350,
+  },
+  elite: {
+    keysPerTask: 5,
+    goldBonus: 750,
+  },
 } as const;
 
