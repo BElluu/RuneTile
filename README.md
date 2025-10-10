@@ -1,4 +1,6 @@
-# 🎮 RuneTiles
+<div align="center">
+  <img src="https://github.com/BElluu/RuneTiles/blob/master/src/assets/rune_tiles_logo_nobc.png" alt="RuneTiles Logo" width="400"/>
+</div>
 
 > A roguelike tile-based progression game inspired by Old School RuneScape
 
