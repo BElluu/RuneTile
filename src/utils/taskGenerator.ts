@@ -1,5 +1,14 @@
 import type { GeneratedTask, PlayerStats, QuestData } from '@/types/game';
 import { TaskCategory, TaskDifficulty } from '@/types/game';
+import bossesData from '@/data/bosses.json';
+
+interface BossData {
+  id: string;
+  name: string;
+  combatLevel: number;
+  category: 'low' | 'mid' | 'high' | 'elite';
+  isWilderness: boolean;
+}
 
 // Lista skilli do generowania zadań
 const SKILLS = [
@@ -8,51 +17,6 @@ const SKILLS = [
   'smithing', 'mining', 'herblore', 'agility', 'thieving', 'slayer', 'farming',
   'runecraft', 'hunter', 'construction'
 ] as const;
-
-// Lista questów
-const QUESTS = [
-  'Cook\'s Assistant', 'Dragon Slayer', 'Lost City', 'Monkey Madness',
-  'Recipe for Disaster', 'Desert Treasure', 'Fremennik Trials',
-  'Heroes\' Quest', 'Legends\' Quest', 'Recipe for Disaster: Freeing the Mountain Dwarf',
-  'Underground Pass', 'Temple of Ikov', 'The Grand Tree', 'Waterfall Quest'
-];
-
-// Lista bossów z OSRS Wiki
-const BOSSES = [
-  // Low-level bosses
-  'Giant Mole', 'Obor', 'Bryophyta', 'Callisto', 'Vet\'ion', 'Venenatis', 'Chaos Elemental',
-  'Chaos Fanatic', 'Crazy Archaeologist', 'Scorpia', 'King Black Dragon',
-  
-  // Mid-level bosses  
-  'Kraken', 'Zulrah', 'Vorkath', 'Kalphite Queen', 'Dagannoth Kings', 'Barrows Brothers',
-  'Abyssal Sire', 'Cerberus', 'Alchemical Hydra', 'The Nightmare', 'The Gauntlet',
-  'Corrupted Gauntlet', 'Zalcano', 'TzTok-Jad', 'TzKal-Zuk',
-  
-  // High-level bosses
-  'Nex', 'Corporeal Beast', 'God Wars Dungeon Bosses', 'Commander Zilyana',
-  'General Graardor', 'Kree\'Arra', 'K\'ril Tsutsaroth', 'Saradomin', 'Zamorak',
-  'Bandos', 'Armadyl', 'Seren', 'The Great Olm', 'Tekton', 'Vasa Nistirio',
-  'Vespula', 'Vanguard', 'Muttadiles', 'Lizardman Shamans', 'Demonic Gorillas',
-  'Lizardman Shamans', 'Demonic Gorillas', 'Lizardman Shamans', 'Demonic Gorillas',
-  
-  // Wilderness bosses
-  'Chaos Elemental', 'Chaos Fanatic', 'Crazy Archaeologist', 'Scorpia',
-  'Callisto', 'Vet\'ion', 'Venenatis', 'King Black Dragon',
-  
-  // Raid bosses
-  'The Great Olm', 'Tekton', 'Vasa Nistirio', 'Vespula', 'Vanguard', 'Muttadiles',
-  'Lizardman Shamans', 'Demonic Gorillas', 'The Nightmare', 'The Gauntlet',
-  'Corrupted Gauntlet', 'Zalcano'
-];
-
-// Lista dropów
-const DROPS = [
-  'Dragon Med Helm', 'Dragon Chainbody', 'Dragon Platelegs', 'Dragon Plateskirt',
-  'Abyssal Whip', 'Dragon Scimitar', 'Dragon Longsword', 'Dragon Dagger',
-  'Rune Scimitar', 'Rune Longsword', 'Rune Platebody', 'Rune Platelegs',
-  'Magic Shortbow', 'Rune Crossbow', 'Dragon Boots', 'Ranger Boots',
-  'Granite Maul', 'Granite Shield', 'Granite Legs', 'Granite Body'
-];
 
 // Lista przedmiotów do kupienia na GE
 const GE_ITEMS = [
@@ -123,7 +87,8 @@ export async function generateTaskForTile(
     case TaskCategory.BOSS:
       return generateBossTask(tileId);
     case TaskCategory.DROP:
-      return generateDropTask(tileId);
+      // DROP category deprecated - use BOSS instead
+      return generateBossTask(tileId);
     case TaskCategory.GRANDEXCHANGE:
       return generateGrandExchangeTask(tileId);
     default:
@@ -244,54 +209,41 @@ async function generateQuestTask(tileId: string, playerName: string): Promise<Ge
 }
 
 function generateBossTask(tileId: string): GeneratedTask {
-  const boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+  const bosses: BossData[] = bossesData.bosses as BossData[];
+  const boss = bosses[Math.floor(Math.random() * bosses.length)];
+  
   if (!boss) {
     // Fallback - spróbuj ponownie
     return generateBossTask(tileId);
   }
-  
-  const killCount = Math.floor(Math.random() * 10) + 1; // 1-10 kills
-  
+
+  const difficultyConfig: Record<string, { difficulty: TaskDifficulty, killCount: [number, number], goldMultiplier: number }> = {
+    'low': { difficulty: TaskDifficulty.EASY, killCount: [5, 20], goldMultiplier: 30 },
+    'mid': { difficulty: TaskDifficulty.MEDIUM, killCount: [3, 15], goldMultiplier: 65 },
+    'high': { difficulty: TaskDifficulty.HARD, killCount: [2, 10], goldMultiplier: 200 },
+    'elite': { difficulty: TaskDifficulty.ELITE, killCount: [1, 5], goldMultiplier: 350 }
+  };
+
+  const config = difficultyConfig[boss.category] ?? difficultyConfig['mid']!;
+  const killCount = Math.floor(Math.random() * (config.killCount[1] - config.killCount[0] + 1)) + config.killCount[0];
+
+  const goldReward = killCount * config.goldMultiplier;
+
   return {
     id: `boss_${tileId}`,
-    title: `Boss Kill: ${boss}`,
-    description: `Kill ${boss} ${killCount} time${killCount > 1 ? 's' : ''}`,
+    title: `Boss: ${boss.name}`,
+    description: `Kill ${boss.name}${boss.isWilderness ? ' (Wilderness)' : ''} ${killCount} time${killCount > 1 ? 's' : ''}`,
     category: TaskCategory.BOSS,
-    difficulty: getDifficultyFromKillCount(killCount),
+    difficulty: config.difficulty,
     requirements: [{
       type: 'boss',
-      target: boss,
+      target: boss.name,
       amount: killCount
     }],
     rewards: [{
-      type: 'keys',
-      amount: Math.floor(killCount / 3) + 1,
-      description: `${Math.floor(killCount / 3) + 1} Key${Math.floor(killCount / 3) + 1 > 1 ? 's' : ''}`
-    }]
-  };
-}
-
-function generateDropTask(tileId: string): GeneratedTask {
-  const drop = DROPS[Math.floor(Math.random() * DROPS.length)];
-  if (!drop) {
-    // Fallback - spróbuj ponownie
-    return generateDropTask(tileId);
-  }
-  
-  return {
-    id: `drop_${tileId}`,
-    title: `Drop: ${drop}`,
-    description: `Obtain ${drop} as a drop from any monster`,
-    category: TaskCategory.DROP,
-    difficulty: TaskDifficulty.MEDIUM,
-    requirements: [{
-      type: 'drop',
-      target: drop
-    }],
-    rewards: [{
-      type: 'keys',
-      amount: 1,
-      description: '1 Key'
+      type: 'gold',
+      amount: goldReward,
+      description: `${goldReward.toLocaleString()} Gold`
     }]
   };
 }
@@ -299,11 +251,10 @@ function generateDropTask(tileId: string): GeneratedTask {
 function generateGrandExchangeTask(tileId: string): GeneratedTask {
   const item = GE_ITEMS[Math.floor(Math.random() * GE_ITEMS.length)];
   if (!item) {
-    // Fallback - spróbuj ponownie
     return generateGrandExchangeTask(tileId);
   }
   
-  const amount = Math.floor(Math.random() * 50) + 10; // 10-60 items
+  const amount = Math.floor(Math.random() * 50) + 10;
   
   return {
     id: `grandexchange_${tileId}`,
@@ -348,13 +299,6 @@ function getDifficultyFromLevelIncrease(levelIncrease: number): TaskDifficulty {
   if (levelIncrease <= 2) return TaskDifficulty.EASY;
   if (levelIncrease <= 5) return TaskDifficulty.MEDIUM;
   if (levelIncrease <= 8) return TaskDifficulty.HARD;
-  return TaskDifficulty.ELITE;
-}
-
-function getDifficultyFromKillCount(killCount: number): TaskDifficulty {
-  if (killCount <= 2) return TaskDifficulty.EASY;
-  if (killCount <= 5) return TaskDifficulty.MEDIUM;
-  if (killCount <= 8) return TaskDifficulty.HARD;
   return TaskDifficulty.ELITE;
 }
 

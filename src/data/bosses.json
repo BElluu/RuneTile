@@ -1,0 +1,404 @@
+{
+  "bosses": [
+    {
+      "id": "giant_mole",
+      "name": "Giant Mole",
+      "combatLevel": 230,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "obor",
+      "name": "Obor",
+      "combatLevel": 106,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "bryophyta",
+      "name": "Bryophyta",
+      "combatLevel": 128,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "sarachnis",
+      "name": "Sarachnis",
+      "combatLevel": 318,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "deranged_archaeologist",
+      "name": "Deranged Archaeologist",
+      "combatLevel": 276,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "king_black_dragon",
+      "name": "King Black Dragon",
+      "combatLevel": 276,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "chaos_elemental",
+      "name": "Chaos Elemental",
+      "combatLevel": 305,
+      "category": "mid",
+      "isWilderness": true
+    },
+    {
+      "id": "chaos_fanatic",
+      "name": "Chaos Fanatic",
+      "combatLevel": 202,
+      "category": "low",
+      "isWilderness": true
+    },
+    {
+      "id": "crazy_archaeologist",
+      "name": "Crazy Archaeologist",
+      "combatLevel": 204,
+      "category": "low",
+      "isWilderness": true
+    },
+    {
+      "id": "scorpia",
+      "name": "Scorpia",
+      "combatLevel": 225,
+      "category": "low",
+      "isWilderness": true
+    },
+    {
+      "id": "callisto",
+      "name": "Callisto",
+      "combatLevel": 470,
+      "category": "high",
+      "isWilderness": true
+    },
+    {
+      "id": "vetion",
+      "name": "Vet'ion",
+      "combatLevel": 454,
+      "category": "high",
+      "isWilderness": true
+    },
+    {
+      "id": "venenatis",
+      "name": "Venenatis",
+      "combatLevel": 464,
+      "category": "high",
+      "isWilderness": true
+    },
+    {
+      "id": "kalphite_queen",
+      "name": "Kalphite Queen",
+      "combatLevel": 333,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "dagannoth_prime",
+      "name": "Dagannoth Prime",
+      "combatLevel": 303,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "dagannoth_rex",
+      "name": "Dagannoth Rex",
+      "combatLevel": 303,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "dagannoth_supreme",
+      "name": "Dagannoth Supreme",
+      "combatLevel": 303,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "kraken",
+      "name": "Kraken",
+      "combatLevel": 291,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "thermonuclear_smoke_devil",
+      "name": "Thermonuclear Smoke Devil",
+      "combatLevel": 301,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "cerberus",
+      "name": "Cerberus",
+      "combatLevel": 318,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "abyssal_sire",
+      "name": "Abyssal Sire",
+      "combatLevel": 350,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "grotesque_guardians",
+      "name": "Grotesque Guardians",
+      "combatLevel": 324,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "alchemical_hydra",
+      "name": "Alchemical Hydra",
+      "combatLevel": 426,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "barrows",
+      "name": "Barrows Brothers",
+      "combatLevel": 115,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "zulrah",
+      "name": "Zulrah",
+      "combatLevel": 725,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "vorkath",
+      "name": "Vorkath",
+      "combatLevel": 732,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "commander_zilyana",
+      "name": "Commander Zilyana",
+      "combatLevel": 596,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "general_graardor",
+      "name": "General Graardor",
+      "combatLevel": 624,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "kreearra",
+      "name": "Kree'arra",
+      "combatLevel": 580,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "kril_tsutsaroth",
+      "name": "K'ril Tsutsaroth",
+      "combatLevel": 650,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "corporeal_beast",
+      "name": "Corporeal Beast",
+      "combatLevel": 785,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "tzkal_zuk",
+      "name": "TzKal-Zuk",
+      "combatLevel": 1400,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "tztok_jad",
+      "name": "TzTok-Jad",
+      "combatLevel": 702,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "the_gauntlet",
+      "name": "The Gauntlet",
+      "combatLevel": 674,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "corrupted_gauntlet",
+      "name": "Corrupted Gauntlet",
+      "combatLevel": 674,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "zalcano",
+      "name": "Zalcano",
+      "combatLevel": 360,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "the_nightmare",
+      "name": "The Nightmare",
+      "combatLevel": 814,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "phosanis_nightmare",
+      "name": "Phosani's Nightmare",
+      "combatLevel": 1160,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "nex",
+      "name": "Nex",
+      "combatLevel": 1001,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "theatre_of_blood",
+      "name": "Theatre of Blood",
+      "combatLevel": 0,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "chambers_of_xeric",
+      "name": "Chambers of Xeric",
+      "combatLevel": 0,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "cox_cm",
+      "name": "Chambers of Xeric (CM)",
+      "combatLevel": 0,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "tombs_of_amascut",
+      "name": "Tombs of Amascut",
+      "combatLevel": 0,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "toa_expert",
+      "name": "Tombs of Amascut (Expert)",
+      "combatLevel": 0,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "wintertodt",
+      "name": "Wintertodt",
+      "combatLevel": 0,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "tempoross",
+      "name": "Tempoross",
+      "combatLevel": 0,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "skotizo",
+      "name": "Skotizo",
+      "combatLevel": 321,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "mimic",
+      "name": "Mimic",
+      "combatLevel": 196,
+      "category": "mid",
+      "isWilderness": false
+    },
+    {
+      "id": "hespori",
+      "name": "Hespori",
+      "combatLevel": 284,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "phantom_muspah",
+      "name": "Phantom Muspah",
+      "combatLevel": 650,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "duke_sucellus",
+      "name": "Duke Sucellus",
+      "combatLevel": 636,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "the_leviathan",
+      "name": "The Leviathan",
+      "combatLevel": 700,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "the_whisperer",
+      "name": "The Whisperer",
+      "combatLevel": 640,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "vardorvis",
+      "name": "Vardorvis",
+      "combatLevel": 737,
+      "category": "high",
+      "isWilderness": false
+    },
+    {
+      "id": "scurrius",
+      "name": "Scurrius",
+      "combatLevel": 162,
+      "category": "low",
+      "isWilderness": false
+    },
+    {
+      "id": "araxxor",
+      "name": "Araxxor",
+      "combatLevel": 800,
+      "category": "elite",
+      "isWilderness": false
+    },
+    {
+      "id": "sol_heredit",
+      "name": "Sol Heredit",
+      "combatLevel": 775,
+      "category": "elite",
+      "isWilderness": false
+    }
+  ]
+}
+
