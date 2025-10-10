@@ -552,7 +552,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
             className="p-3 rounded border-2 flex flex-col items-center transition-colors"
             style={{
               backgroundColor: '#3a3530',
-              borderColor: '#574f47'
+              borderColor: '#574f47',
+              display: 'none' // Hidden for now
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
