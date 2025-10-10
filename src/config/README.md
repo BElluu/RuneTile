@@ -25,10 +25,28 @@ SKILL_REWARDS = {
   goldBonus: 0       // 0 = no gold
 }
 
-// Grand Exchange Tasks - reward for buying items in OSRS
+// Grand Exchange Tasks - rewards based on item value
 GE_REWARDS = {
-  keysPerTask: 0,      // No keys (easier tasks)
-  goldBonus: 150       // Gold reward for effort
+  cheap: {
+    itemAmount: [50, 100],  // Bulk items
+    goldReward: 50,         // Small reward
+    keysReward: 0
+  },
+  medium: {
+    itemAmount: [20, 50],
+    goldReward: 150,
+    keysReward: 0
+  },
+  expensive: {
+    itemAmount: [5, 20],
+    goldReward: 350,
+    keysReward: 0
+  },
+  luxury: {
+    itemAmount: [1, 5],     // Few expensive items
+    goldReward: 600,        // Best reward
+    keysReward: 1           // Bonus key!
+  }
 }
 
 // Slayer Tasks - rewards for slayer masters
@@ -146,9 +164,15 @@ export const STARTING_RESOURCES = {
 - `goldBonus` - bonus gold
 
 ### 🛒 Grand Exchange Tasks
-- `keysPerTask` - keys reward (usually 0)
-- `goldBonus` - gold reward for buying items in OSRS
-- `itemAmount` - item amount range [min, max]
+- `cheap.itemAmount` - bulk amount [50-100] for cheap items (feathers, logs, etc.)
+- `cheap.goldReward` - 50 gold reward
+- `medium.itemAmount` - moderate amount [20-50] for mid-tier items (coal, runes, etc.)
+- `medium.goldReward` - 150 gold reward
+- `expensive.itemAmount` - small amount [5-20] for expensive items (dragon items, etc.)
+- `expensive.goldReward` - 350 gold reward
+- `luxury.itemAmount` - very few [1-5] for luxury items (twisted bow, scythe, etc.)
+- `luxury.goldReward` - 600 gold reward + 1 key!
+- Items are automatically categorized by tier in `src/data/ge_items.json`
 
 ### 🎯 Slayer Tasks
 - `tasksRequired.turael` - tasks for Turael (default 5)

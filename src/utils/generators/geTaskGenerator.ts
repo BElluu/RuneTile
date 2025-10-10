@@ -1,42 +1,63 @@
 import type { GeneratedTask, TaskReward } from '@/types/game';
-import { TaskCategory, TaskDifficulty } from '@/types/game';
+import { TaskCategory } from '@/types/game';
 import { GE_REWARDS } from '@/config/rewards';
+import geItemsData from '@/data/ge_items.json';
 
-const GE_ITEMS = [
-  'Wand of Storm', 'Staff of Fire', 'Staff of Water', 'Staff of Earth',
-  'Rune Essence', 'Pure Essence', 'Coal', 'Iron Ore', 'Gold Ore',
-  'Mithril Ore', 'Adamantite Ore', 'Runite Ore', 'Logs', 'Oak Logs',
-  'Willow Logs', 'Maple Logs', 'Yew Logs', 'Magic Logs', 'Raw Lobster',
-  'Raw Swordfish', 'Raw Shark', 'Raw Monkfish', 'Raw Anglerfish'
-];
+type ItemTier = 'cheap' | 'medium' | 'expensive' | 'luxury';
+
+interface GEItemsData {
+  cheap: string[];
+  medium: string[];
+  expensive: string[];
+  luxury: string[];
+}
+
+const GE_ITEMS = geItemsData as GEItemsData;
 
 export function generateGrandExchangeTask(tileId: string): GeneratedTask {
-  const item = GE_ITEMS[Math.floor(Math.random() * GE_ITEMS.length)];
+  const tierRoll = Math.random();
+  let tier: ItemTier;
+  
+  if (tierRoll < 0.40) {
+    tier = 'cheap';      // 40% chance
+  } else if (tierRoll < 0.70) {
+    tier = 'medium';     // 30% chance
+  } else if (tierRoll < 0.90) {
+    tier = 'expensive';  // 20% chance
+  } else {
+    tier = 'luxury';     // 10% chance
+  }
+  
+  const tierItems = GE_ITEMS[tier];
+  const item = tierItems[Math.floor(Math.random() * tierItems.length)];
+  
   if (!item) {
     return generateGrandExchangeTask(tileId);
   }
   
+  const config = GE_REWARDS[tier];
+  
   const amount = Math.floor(
-    Math.random() * (GE_REWARDS.itemAmount[1] - GE_REWARDS.itemAmount[0] + 1)
-  ) + GE_REWARDS.itemAmount[0];
+    Math.random() * (config.itemAmount[1] - config.itemAmount[0] + 1)
+  ) + config.itemAmount[0];
   
   const rewards: TaskReward[] = [{
     type: 'keys',
-    amount: GE_REWARDS.keysPerTask,
-    description: `${GE_REWARDS.keysPerTask} Key${GE_REWARDS.keysPerTask > 1 ? 's' : ''}`
+    amount: config.keysPerTask,
+    description: `${config.keysPerTask} Key${config.keysPerTask > 1 ? 's' : ''}`
   },
   {
     type: 'gold',
-    amount: GE_REWARDS.goldBonus,
-    description: `${GE_REWARDS.goldBonus} Gold`
+    amount: config.goldBonus,
+    description: `${config.goldBonus} Gold`
   }];
   
   return {
     id: `grandexchange_${tileId}`,
     title: `Grand Exchange: ${item}`,
-    description: `Buy ${amount} ${item} from the Grand Exchange`,
+    description: `Buy ${amount}× ${item} from the Grand Exchange`,
     category: TaskCategory.GRANDEXCHANGE,
-    difficulty: TaskDifficulty.EASY,
+    difficulty: config.difficulty,
     requirements: [{
       type: 'item',
       target: item,

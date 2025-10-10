@@ -71,9 +71,31 @@ export const SKILL_DIFFICULTY_THRESHOLDS = {
 // GRAND EXCHANGE TASKS
 // ============================================
 export const GE_REWARDS = {
-  keysPerTask: 0,
-  goldBonus: 150,
-  itemAmount: [10, 60] as [number, number],
+  // Gold rewards based on item tier (player spends GP in OSRS)
+  cheap: {
+    difficulty: TaskDifficulty.EASY,
+    itemAmount: [50, 100] as [number, number],  // Buy in bulk (cheap items)
+    goldBonus: 50,                              // Small reward
+    keysPerTask: 0,
+  },
+  medium: {
+    difficulty: TaskDifficulty.MEDIUM,
+    itemAmount: [20, 50] as [number, number],   // Moderate amount
+    goldBonus: 150,                             // Decent reward
+    keysPerTask: 0,
+  },
+  expensive: {
+    difficulty: TaskDifficulty.HARD,
+    itemAmount: [5, 20] as [number, number],    // Fewer items (expensive)
+    goldBonus: 350,                             // Good reward
+    keysPerTask: 0,
+  },
+  luxury: {
+    difficulty: TaskDifficulty.ELITE,
+    itemAmount: [1, 5] as [number, number],     // Very few (luxury items)
+    goldBonus: 600,                             // Great reward
+    keysPerTask: 1,                               // Bonus key!
+  },
 } as const;
 
 // ============================================
