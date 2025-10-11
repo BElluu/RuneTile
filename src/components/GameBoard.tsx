@@ -971,8 +971,72 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                   style={{ imageRendering: 'pixelated' }}
                                 />
                               )}
-                              <div className="text-sm text-white font-semibold">
-                                {task?.title || 'Unknown task'}
+                              <div className="flex-1">
+                                <div className="text-sm text-white font-semibold">
+                                  {task?.title || 'Unknown task'}
+                                </div>
+                                
+                                {/* Rewards display - only for unlocked tiles */}
+                                {gameState.unlockedTiles.includes(hoverTile) && !gameState.completedTiles.includes(hoverTile) && task?.rewards && (
+                                  <div className="flex items-center gap-2 mt-1.5">
+                                    {[...task.rewards].sort((a, b) => {
+                                      // Keys first, then gold
+                                      if (a.type === 'keys' && b.type !== 'keys') return -1;
+                                      if (a.type !== 'keys' && b.type === 'keys') return 1;
+                                      return 0;
+                                    }).map((reward, idx) => {
+                                      if (reward.amount <= 0) return null;
+                                      
+                                      if (reward.type === 'keys') {
+                                        return (
+                                          <div 
+                                            key={idx}
+                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded"
+                                            style={{
+                                              backgroundColor: 'rgba(96, 165, 250, 0.25)',
+                                              border: '1px solid rgba(96, 165, 250, 0.5)'
+                                            }}
+                                          >
+                                            <img 
+                                              src="/src/assets/menu/key_icon.png" 
+                                              alt="Keys" 
+                                              className="w-3.5 h-3.5"
+                                              style={{ imageRendering: 'pixelated' }}
+                                            />
+                                            <span className="text-blue-300 text-xs font-bold" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+                                              {reward.amount}
+                                            </span>
+                                          </div>
+                                        );
+                                      }
+                                      
+                                      if (reward.type === 'gold') {
+                                        return (
+                                          <div 
+                                            key={idx}
+                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded"
+                                            style={{
+                                              backgroundColor: 'rgba(251, 191, 36, 0.25)',
+                                              border: '1px solid rgba(251, 191, 36, 0.5)'
+                                            }}
+                                          >
+                                            <img 
+                                              src="/src/assets/menu/gold_icon.png" 
+                                              alt="Gold" 
+                                              className="w-3.5 h-3.5"
+                                              style={{ imageRendering: 'pixelated' }}
+                                            />
+                                            <span className="text-yellow-300 text-xs font-bold" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+                                              {reward.amount}
+                                            </span>
+                                          </div>
+                                        );
+                                      }
+                                      
+                                      return null;
+                                    })}
+                                  </div>
+                                )}
                               </div>
                             </div>
                             
