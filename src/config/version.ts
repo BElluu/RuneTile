@@ -19,87 +19,51 @@ export interface ChangelogEntry {
 export const CURRENT_CHANGELOG: ChangelogEntry[] = [
   {
     category: 'feature',
-    description: 'Initial release of RuneTiles - an interactive companion app for OSRS!'
+    description: '🎮 Initial release of RuneTiles - an interactive companion app for OSRS!'
   },
   {
     category: 'feature',
-    description: 'Tile-based progression system with zoom, pan, and unlock mechanics'
+    description: '🗺️ Tile-based progression system with infinite zoom, pan, and unlock mechanics'
   },
   {
     category: 'feature',
-    description: 'Real-time OSRS stats integration with 15-minute cache for performance'
+    description: '📊 Multiple task types: Skills, Quests, Bosses (50+), Grand Exchange (300+ items), Daily Challenges'
   },
   {
     category: 'feature',
-    description: 'Skill-based tasks: Train any skill from your current level with dynamic difficulty'
+    description: '💀 Slayer Masters progression system with 9 masters and quest-based replacements'
   },
   {
     category: 'feature',
-    description: 'Quest tasks: Complete available OSRS quests with RuneMetrics API integration'
+    description: '🏪 In-game Shop: Trade your gold for keys to unlock more tiles'
   },
   {
     category: 'feature',
-    description: 'Boss tasks: Kill bosses with 4 difficulty tiers (Low/Mid/High/Elite) - 50+ bosses available'
+    description: '📈 Real-time OSRS stats integration with automatic 15-minute refresh'
   },
   {
     category: 'feature',
-    description: 'Grand Exchange tasks: Buy items across 4 price tiers (300+ items) and earn rewards'
-  },
-  {
-    category: 'feature',
-    description: 'Slayer Masters system: Complete tasks for 9 different masters, with quest-based replacements'
-  },
-  {
-    category: 'feature',
-    description: 'Daily Tasks system: 4 rotating daily challenges (Easy/Medium/Hard/Elite) with increased rewards'
-  },
-  {
-    category: 'feature',
-    description: 'In-game Shop: Purchase keys using gold with adjustable quantity'
-  },
-  {
-    category: 'feature',
-    description: 'Skills Modal: View your complete OSRS stats, total level, and last update time'
-  },
-  {
-    category: 'feature',
-    description: 'Settings: Font toggle (RuneScape/Standard), progress reset, changelog viewer'
-  },
-  {
-    category: 'feature',
-    description: 'Welcome Modal for first-time players with game guide and tips'
+    description: '🐛 Feedback System: Report bugs or suggest features directly from the app'
   },
   {
     category: 'improvement',
-    description: 'Beautiful redesigned menu with gradient backgrounds, blur effects, and smooth animations'
+    description: '✨ Beautiful UI with gradient backgrounds, blur effects, and smooth animations'
   },
   {
     category: 'improvement',
-    description: 'Tile rewards displayed on hover (keys and gold) with smart sorting'
+    description: '🎯 Hover effects on tiles show rewards and provide visual feedback'
   },
   {
     category: 'improvement',
-    description: 'Slayer Masters automatically sorted by difficulty (easiest to hardest)'
-  },
-  {
-    category: 'improvement',
-    description: 'Hover animations on tile buttons (Unlock/Complete) with scale and gradient effects'
-  },
-  {
-    category: 'improvement',
-    description: 'Fade-in animation for newly unlocked adjacent tiles'
-  },
-  {
-    category: 'improvement',
-    description: 'Modular task generation system with centralized reward configuration'
+    description: '👋 Welcome modal for first-time players with detailed game guide'
   },
   {
     category: 'balance',
-    description: 'Balanced dual economy: Keys for tile unlocking, Gold for shop purchases'
+    description: '⚖️ Dual economy: Keys unlock tiles, Gold purchases items from shop'
   },
   {
     category: 'balance',
-    description: 'Progressive difficulty: Harder tasks give more gold, Elite bosses award keys'
+    description: '📈 Progressive difficulty: Harder tasks = better rewards'
   }
 ];
 

@@ -73,12 +73,14 @@ export function SettingsModal({
         </div>
 
         {!showResetConfirm ? (
-          <div className="space-y-6">
-            {/* Font Setting */}
-            <div className="space-y-2">
-              <label className="text-white text-sm font-semibold">Font</label>
-              <div className="flex items-center space-x-3">
-                <label className="flex items-center space-x-2 cursor-pointer">
+          <div className="space-y-5">
+            {/* Preferences Section */}
+            <div>
+              <h3 className="text-white text-sm font-bold mb-3 flex items-center gap-2">
+                ⚙️ Preferences
+              </h3>
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-white/5 transition-colors">
                   <input
                     type="checkbox"
                     checked={useRunescapeFont}
@@ -93,74 +95,92 @@ export function SettingsModal({
               </div>
             </div>
 
-            {/* Changelog Button */}
-            {/* Report Issue */}
-            <div className="space-y-2 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
-              <label className="text-white text-sm font-semibold">Feedback</label>
-              <button
-                onClick={() => {
-                  onOpenFeedback();
-                  onClose();
-                }}
-                className="w-full px-4 py-2 text-white rounded text-sm border"
-                style={{
-                  background: 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)',
-                  borderColor: '#2F5522',
-                  transition: 'transform 0.2s, background 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  if (enableAnimations) {
-                    e.currentTarget.style.background = 'linear-gradient(180deg, #7DB95C 0%, #5A8F42 50%, #3A6528 100%)';
-                    e.currentTarget.style.transform = 'scale(1.01)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (enableAnimations) {
-                    e.currentTarget.style.background = 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }
-                }}
-              >
-                🐛 Report Issue / Suggest Feature
-              </button>
+            {/* Information Section */}
+            <div className="pt-3 border-t" style={{ borderColor: '#4a443f' }}>
+              <h3 className="text-white text-sm font-bold mb-3 flex items-center gap-2">
+                ℹ️ Information
+              </h3>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => {
+                    onViewChangelog();
+                    onClose();
+                  }}
+                  className="px-4 py-2.5 text-white rounded text-sm border text-left flex items-center gap-2"
+                  style={{
+                    background: 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
+                    borderColor: '#3D2F24',
+                    transition: 'transform 0.2s, background 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (enableAnimations) {
+                      e.currentTarget.style.background = 'linear-gradient(180deg, #9d8161 0%, #6a5344 50%, #4a3829 100%)';
+                      e.currentTarget.style.transform = 'scale(1.01)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (enableAnimations) {
+                      e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }
+                  }}
+                >
+                  <span className="text-lg">📋</span>
+                  <div className="flex-1">
+                    <div className="font-semibold">View Changelog</div>
+                    <div className="text-xs text-gray-400">What's new in v{APP_VERSION}</div>
+                  </div>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-2 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
-              <label className="text-white text-sm font-semibold">What's New</label>
-              <button
-                onClick={() => {
-                  onViewChangelog();
-                  onClose();
-                }}
-                className="w-full px-4 py-2 text-white rounded text-sm border"
-                style={{
-                  background: 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)',
-                  borderColor: '#3D2F24',
-                  transition: 'transform 0.2s, background 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  if (enableAnimations) {
-                    e.currentTarget.style.background = 'linear-gradient(180deg, #9d8161 0%, #6a5344 50%, #4a3829 100%)';
-                    e.currentTarget.style.transform = 'scale(1.01)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (enableAnimations) {
-                    e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }
-                }}
-              >
-                📋 View Changelog
-              </button>
+            {/* Help & Feedback Section */}
+            <div className="pt-3 border-t" style={{ borderColor: '#4a443f' }}>
+              <h3 className="text-white text-sm font-bold mb-3 flex items-center gap-2">
+                💬 Help & Feedback
+              </h3>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => {
+                    onOpenFeedback();
+                    onClose();
+                  }}
+                  className="px-4 py-2.5 text-white rounded text-sm border text-left flex items-center gap-2"
+                  style={{
+                    background: 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)',
+                    borderColor: '#2F5522',
+                    transition: 'transform 0.2s, background 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (enableAnimations) {
+                      e.currentTarget.style.background = 'linear-gradient(180deg, #7DB95C 0%, #5A8F42 50%, #3A6528 100%)';
+                      e.currentTarget.style.transform = 'scale(1.01)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (enableAnimations) {
+                      e.currentTarget.style.background = 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }
+                  }}
+                >
+                  <span className="text-lg">🐛</span>
+                  <div className="flex-1">
+                    <div className="font-semibold">Report Issue / Suggest Feature</div>
+                    <div className="text-xs text-gray-400">Help us improve RuneTiles</div>
+                  </div>
+                </button>
+              </div>
             </div>
 
-            {/* Reset Progress Button */}
-            <div className="space-y-2 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
-              <label className="text-white text-sm font-semibold">Reset Progress</label>
+            {/* Danger Zone */}
+            <div className="pt-3 border-t" style={{ borderColor: '#4a443f' }}>
+              <h3 className="text-white text-sm font-bold mb-3 flex items-center gap-2">
+                ⚠️ Danger Zone
+              </h3>
               <button
                 onClick={handleResetClick}
-                className="w-full px-4 py-2 text-white rounded text-sm border"
+                className="w-full px-4 py-2.5 text-white rounded text-sm border text-left flex items-center gap-2"
                 style={{
                   background: 'linear-gradient(180deg, #8B4545 0%, #5C3A3A 50%, #3D2424 100%)',
                   borderColor: '#3D2424',
@@ -179,15 +199,12 @@ export function SettingsModal({
                   }
                 }}
               >
-                Reset Progress
+                <span className="text-lg">🗑️</span>
+                <div className="flex-1">
+                  <div className="font-semibold">Reset Progress</div>
+                  <div className="text-xs text-gray-400">Delete all saved data</div>
+                </div>
               </button>
-            </div>
-
-            {/* Version Display */}
-            <div className="pt-4 border-t text-center" style={{ borderColor: '#4a443f' }}>
-              <span className="text-gray-400 text-xs">
-                Version {APP_VERSION}
-              </span>
             </div>
           </div>
         ) : (
