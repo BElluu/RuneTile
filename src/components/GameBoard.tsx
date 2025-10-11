@@ -47,6 +47,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const gameBoardRef = React.useRef<HTMLDivElement>(null);
   const wheelListenerRef = React.useRef<((e: Event) => void) | null>(null);
+  const [animatingTiles, setAnimatingTiles] = React.useState<Set<string>>(new Set());
+  const previousVisibleTiles = React.useRef<Set<string>>(new Set());
   const [slayerMasters, setSlayerMasters] = useState(() => {
     // Try to load from localStorage first
     const savedSlayerMasters = loadSlayerMasters();
@@ -115,6 +117,35 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     const interval = setInterval(checkDailyReset, 60000);
     return () => clearInterval(interval);
   }, [dailyTasksState.date]);
+
+  // Track new tiles for animation
+  useEffect(() => {
+    if (!gameState) return;
+
+    const currentVisibleTiles = generateVisibleTiles(gameState);
+    const currentSet = new Set(currentVisibleTiles.map(({ x, y }) => `${x},${y}`));
+    
+    // Find tiles that are new (not in previous set)
+    const newTiles = new Set<string>();
+    currentSet.forEach(tileId => {
+      if (!previousVisibleTiles.current.has(tileId)) {
+        newTiles.add(tileId);
+      }
+    });
+
+    // Set new tiles for animation
+    if (newTiles.size > 0) {
+      setAnimatingTiles(newTiles);
+      
+      // Remove animation class after animation completes
+      setTimeout(() => {
+        setAnimatingTiles(new Set());
+      }, 500);
+    }
+
+    // Update previous tiles
+    previousVisibleTiles.current = currentSet;
+  }, [gameState?.unlockedTiles?.length, gameState?.visibleTiles?.length]);
 
   useEffect(() => {
     if (!gameState) return;
@@ -792,12 +823,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                         
                         //console.log('Rendering tile:', tileId, 'state:', tileState, 'canUnlock:', canUnlock);
                         
+                        const shouldAnimate = animatingTiles.has(tileId);
+                        
                         return (
                           <div
                             key={tileId}
                             className={`
                               tile-element
                               absolute w-20 h-20 cursor-pointer
+                              ${shouldAnimate ? 'animate-in scale-in duration-300' : ''}
                               ${tileState === 'completed' 
                                 ? 'opacity-60' 
                                 : tileState === 'unlocked'
@@ -971,6 +1005,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onMouseDown={(e) => {
                                         e.stopPropagation();
                                       }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'linear-gradient(180deg, #7DB95C 0%, #5A8F42 50%, #3A6528 100%)';
+                                        e.currentTarget.style.transform = 'scale(1.05)';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)';
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                      }}
                                       className="w-full px-4 py-2 text-white rounded flex items-center justify-center gap-2 pixel-button"
                                       style={{
                                         background: 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)',
@@ -981,7 +1023,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                         boxShadow: '2px 2px 0px rgba(0,0,0,0.5)',
                                         imageRendering: 'pixelated',
                                         textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s, background 0.2s'
                                       }}
                                     >
                                       <span className="text-lg">✓</span>
@@ -997,6 +1040,18 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                       onMouseDown={(e) => {
                                         e.stopPropagation();
                                       }}
+                                      onMouseEnter={(e) => {
+                                        if (gameState.keys >= 1) {
+                                          e.currentTarget.style.background = 'linear-gradient(180deg, #9d8161 0%, #6a5344 50%, #4a3829 100%)';
+                                          e.currentTarget.style.transform = 'scale(1.05)';
+                                        }
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        if (gameState.keys >= 1) {
+                                          e.currentTarget.style.background = 'linear-gradient(180deg, #8B7355 0%, #5C4A3A 50%, #3D2F24 100%)';
+                                          e.currentTarget.style.transform = 'scale(1)';
+                                        }
+                                      }}
                                       className="w-full px-4 py-2 text-white rounded flex items-center justify-center gap-2 pixel-button"
                                       style={{
                                         background: gameState.keys < 1 
@@ -1009,7 +1064,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                                         boxShadow: '2px 2px 0px rgba(0,0,0,0.5)',
                                         imageRendering: 'pixelated',
                                         textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
-                                        cursor: gameState.keys < 1 ? 'not-allowed' : 'pointer'
+                                        cursor: gameState.keys < 1 ? 'not-allowed' : 'pointer',
+                                        transition: 'transform 0.2s, background 0.2s'
                                       }}
                                       disabled={gameState.keys < 1}
                                     >
