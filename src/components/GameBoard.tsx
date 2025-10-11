@@ -7,6 +7,7 @@ import { SkillsModal } from './SkillsModal';
 import { SlayerMastersModal } from './SlayerMastersModal';
 import { SettingsModal } from './SettingsModal';
 import { ChangelogModal } from './ChangelogModal';
+import { WelcomeModal } from './WelcomeModal';
 import { ShopModal } from './ShopModal';
 import { DailyTasksModal } from './DailyTasksModal';
 import { SLAYER_REWARDS } from '@/config/rewards';
@@ -31,6 +32,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [showSlayerModal, setShowSlayerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showShopModal, setShowShopModal] = useState(false);
   const [showDailyModal, setShowDailyModal] = useState(false);
   const [dailyTasks, setDailyTasks] = useState(generateAllDailyTasks());
@@ -76,9 +78,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       loadGame();
     }
 
-    // Check version and show changelog if needed
+    // Check version and show appropriate modal
     const lastSeenVersion = getLastSeenVersion();
-    if (lastSeenVersion !== APP_VERSION) {
+    if (!lastSeenVersion) {
+      // First time player - show welcome modal
+      setShowWelcomeModal(true);
+      saveLastSeenVersion(APP_VERSION);
+    } else if (lastSeenVersion !== APP_VERSION) {
+      // Returning player with new version - show changelog
       setShowChangelogModal(true);
       saveLastSeenVersion(APP_VERSION);
     }
@@ -1298,6 +1305,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         onResetProgress={handleResetProgress}
         onViewChangelog={() => setShowChangelogModal(true)}
       />
+
+      {/* Welcome Modal */}
+      {showWelcomeModal && (
+        <WelcomeModal
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          playerName={gameState.playerName}
+        />
+      )}
 
       {/* Changelog Modal */}
       {showChangelogModal && (
