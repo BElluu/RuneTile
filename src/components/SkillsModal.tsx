@@ -74,7 +74,14 @@ export function SkillsModal({ isOpen, onClose, playerName, playerStats, statsLas
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-white">{playerName}'s Stats</h2>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <img 
+                src="/src/assets/menu/Stats_icon.png" 
+                alt="Stats" 
+                className="w-8 h-8"
+              />
+              {playerName}'s Stats
+            </h2>
             <p className="text-sm text-gray-400 mt-1">Total Level: {totalLevel}</p>
           </div>
           <button

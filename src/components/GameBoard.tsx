@@ -4,7 +4,7 @@ import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loa
 import { generateVisibleTiles, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
 import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsModal } from './SkillsModal';
-import { SlayerMastersPanel } from './SlayerMastersPanel';
+import { SlayerMastersModal } from './SlayerMastersModal';
 import { SettingsModal } from './SettingsModal';
 import { ChangelogModal } from './ChangelogModal';
 import { ShopModal } from './ShopModal';
@@ -1042,32 +1042,13 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         statsLastFetched={gameState.statsLastFetched}
       />
 
-              {/* Slayer Masters Popup */}
-              {showSlayerModal && (
-                <div className="absolute top-32 left-32 z-20">
-                  <div 
-                    className="p-4 rounded border-2 max-w-2xl"
-                    style={{
-                      backgroundColor: '#3a3530',
-                      borderColor: '#574f47'
-                    }}
-                  >
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-lg font-bold text-white">Slayer Masters</h3>
-                      <button
-                        onClick={() => setShowSlayerModal(false)}
-                        className="text-white hover:text-gray-300 text-lg"
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <SlayerMastersPanel 
-                      slayerMasters={slayerMasters} 
-                      onTaskComplete={handleSlayerTaskComplete}
-                    />
-                  </div>
-                </div>
-              )}
+      {/* Slayer Masters Modal */}
+      <SlayerMastersModal
+        isOpen={showSlayerModal}
+        onClose={() => setShowSlayerModal(false)}
+        slayerMasters={slayerMasters}
+        onTaskComplete={handleSlayerTaskComplete}
+      />
 
       {/* Settings Modal */}
       <SettingsModal

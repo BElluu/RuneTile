@@ -61,8 +61,13 @@ export function DailyTasksModal({
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            📅 Daily Tasks
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <img 
+              src="/src/assets/menu/Daily_icon.png" 
+              alt="Daily" 
+              className="w-8 h-8"
+            />
+            Daily Tasks
           </h2>
           <button
             onClick={onClose}
