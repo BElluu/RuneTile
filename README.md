@@ -6,6 +6,7 @@
 
 > A roguelike tile-based progression game inspired by Old School RuneScape
 
+![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)
 ![RuneScape Theme](https://img.shields.io/badge/Theme-RuneScape-orange)
 ![Built with Bun](https://img.shields.io/badge/Built%20with-Bun-black)
 ![React](https://img.shields.io/badge/React-18-blue)
@@ -191,11 +192,27 @@ All data is fetched in real-time when you start a new game and auto-refreshes ev
 - Font preference
 - Last seen app version
 
-## 📜 Legal
+## 📜 License & Legal
 
-RuneScape® and all related content are the property of Jagex Ltd. This project is a fan-made creation and is not affiliated with or endorsed by Jagex. All RuneScape content is used under fair use for educational and entertainment purposes.
+### Code License
 
-This project is open source under the MIT License. See [LICENSE.md](LICENSE.md) for details.
+This project is licensed under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**.
+
+**This means:**
+- ✅ You can use, share, and modify the code for **non-commercial purposes**
+- ✅ You must give **appropriate credit** and indicate changes made
+- ✅ Modified versions must be shared under the **same license**
+- ❌ **Commercial use is not permitted** without explicit permission
+
+See [LICENSE.md](LICENSE.md) for complete details.
+
+### Graphics License
+
+All graphics and visual assets are licensed under **CC BY-NC-SA 3.0**.
+
+### RuneScape® Content
+
+RuneScape® and all related content are the property of **Jagex Ltd**. This project is a fan-made creation and is **not affiliated with or endorsed by Jagex**. All RuneScape content is used under fair use principles for educational and entertainment purposes.
 
 ## 🤝 Contributing
 

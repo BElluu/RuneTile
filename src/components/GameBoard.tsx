@@ -564,9 +564,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           {/* Copyright Notice */}
           <div className="mt-6 text-center text-xs text-gray-300 px-4 max-w-lg">
             <p>
-              RuneScape® and all related content are the property of Jagex Ltd. 
-              Used here under fair use/fan content purposes. 
-              This site is not affiliated with or endorsed by Jagex.
+              Created using intellectual property belonging to Jagex Limited under the terms of Jagex's Fan Content Policy. 
+              This content is not endorsed by or affiliated with Jagex.
             </p>
           </div>
         </div>
@@ -635,9 +634,8 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           {/* Copyright Notice */}
           <div className="mt-6 text-center text-xs text-gray-300 px-4 max-w-lg">
             <p>
-              RuneScape® and all related content are the property of Jagex Ltd. 
-              Used here under fair use/fan content purposes. 
-              This site is not affiliated with or endorsed by Jagex.
+              Created using intellectual property belonging to Jagex Limited under the terms of Jagex's Fan Content Policy. 
+              This content is not endorsed by or affiliated with Jagex.
             </p>
           </div>
         </div>

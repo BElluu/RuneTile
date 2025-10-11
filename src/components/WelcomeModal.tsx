@@ -83,8 +83,8 @@ export function WelcomeModal({ isOpen, onClose, playerName }: WelcomeModalProps)
 
         {/* Footer */}
         <div className="text-center mb-6">
-          <p className="text-gray-400 text-sm">
-            RuneScape® and all related content are the property of Jagex Ltd. This site is not affiliated with or endorsed by Jagex.
+          <p className="text-gray-400 text-xs leading-relaxed">
+            Created using intellectual property belonging to Jagex Limited under the terms of Jagex's Fan Content Policy. This content is not endorsed by or affiliated with Jagex.
           </p>
         </div>
 
