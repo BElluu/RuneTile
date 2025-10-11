@@ -792,6 +792,37 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
         {/* Main board */}
         <div className="flex-1 flex flex-col relative">
+          {/* Buy Me a Coffee */}
+          <div className="absolute bottom-4 right-4 z-10">
+            <a
+              href="https://buymeacoffee.com/belluu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block transition-all duration-200"
+              style={{
+                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05) translateY(-2px)';
+                e.currentTarget.style.filter = 'drop-shadow(0 8px 16px rgba(255, 221, 0, 0.4))';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1) translateY(0)';
+                e.currentTarget.style.filter = 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))';
+              }}
+            >
+              <img
+                src="/src/assets/buymeacoffee.png"
+                alt="Buy Me A Coffee"
+                style={{
+                  height: '40px',
+                  width: 'auto',
+                  borderRadius: '8px'
+                }}
+              />
+            </a>
+          </div>
+
           {/* Zoom controls and Settings */}
           <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
             <button
