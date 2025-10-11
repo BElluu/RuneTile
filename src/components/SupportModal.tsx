@@ -62,6 +62,15 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
               Every contribution helps motivate continued development and keeps the project alive.
             </p>
           </div>
+
+          <div className="p-4 rounded text-center" style={{ backgroundColor: '#1a1714', border: '2px solid #4a443f' }}>
+            <p className="text-gray-300 text-sm mb-1">
+              💬 You can also catch me in-game!
+            </p>
+            <p className="text-white font-bold text-base">
+              OSRS: <span className="text-yellow-400">PanPur</span>
+            </p>
+          </div>
         </div>
 
         {/* Buttons */}
