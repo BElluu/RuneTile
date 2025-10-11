@@ -149,7 +149,7 @@ export const START_TASK_REWARDS = {
 // ============================================
 export const STARTING_RESOURCES = {
   keys: 1,
-  gold: 100,
+  gold: 50,
 } as const;
 
 // ============================================

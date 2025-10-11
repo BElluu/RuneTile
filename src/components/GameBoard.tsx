@@ -97,6 +97,33 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
     };
   }, []);
 
+  // Auto-refresh stats every minute (checks if 15 minutes have passed)
+  useEffect(() => {
+    if (!gameState) return;
+
+    const checkAndRefreshStats = async () => {
+      if (shouldRefreshStats(gameState)) {
+        try {
+          const response = await fetch(`/api/hiscores/${encodeURIComponent(gameState.playerName)}`);
+          if (response.ok) {
+            const freshStats = await response.json();
+            updatePlayerStats(freshStats);
+            const updatedState = { ...gameState, playerStats: freshStats, statsLastFetched: Date.now() };
+            setGameState(updatedState);
+            saveGameState(updatedState);
+          }
+        } catch (error) {
+          console.warn('Failed to auto-refresh stats:', error);
+        }
+      }
+    };
+
+    // Check every minute
+    const interval = setInterval(checkAndRefreshStats, 60000);
+
+    return () => clearInterval(interval);
+  }, [gameState?.statsLastFetched, gameState?.playerName]);
+
   useEffect(() => {
     if (useRunescapeFont) {
       document.body.classList.add('runescape-font');

@@ -75,7 +75,7 @@ export function WelcomeModal({ isOpen, onClose, playerName }: WelcomeModalProps)
               <span>✨</span> Getting Started
             </h3>
             <p className="text-gray-300 text-base leading-relaxed">
-              You start with <strong className="text-blue-400">1 key</strong> and <strong className="text-yellow-400">100 gold</strong>. 
+              You start with <strong className="text-blue-400">1 key</strong> and <strong className="text-yellow-400">50 gold</strong>. 
               Click on the center tile to begin your adventure. Complete the task in OSRS, then return here to claim your rewards!
             </p>
           </div>
