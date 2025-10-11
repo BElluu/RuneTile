@@ -21,6 +21,10 @@ export function SlayerMastersModal({ isOpen, onClose, slayerMasters, onTaskCompl
     return Math.min((completed / required) * 100, 100);
   };
 
+  const sortedMasters = [...slayerMasters].sort((a, b) => {
+    return b.requiredTasks - a.requiredTasks;
+  });
+
   return (
     <div 
       className="fixed inset-0 flex items-center justify-center z-50"
@@ -59,7 +63,7 @@ export function SlayerMastersModal({ isOpen, onClose, slayerMasters, onTaskCompl
 
         {/* Slayer Masters Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-          {slayerMasters.map((master) => {
+          {sortedMasters.map((master) => {
             const progress = getProgressPercentage(master.tasksCompleted, master.requiredTasks);
             const isCompleted = master.tasksCompleted >= master.requiredTasks;
 
