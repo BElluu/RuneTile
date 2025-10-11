@@ -217,17 +217,31 @@ RuneScape® and all related content are the property of **Jagex Ltd**. This proj
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
-- 🐛 Report bugs via GitHub Issues
-- 💡 Suggest new features or improvements
+- 🐛 **Report bugs** - Use the in-app feedback system (Settings → Report Issue) or [GitHub Issues](https://github.com/BElluu/RuneTiles/issues)
+- 💡 **Suggest features** - Use the in-app feedback system or create a feature request on GitHub
 - 🔧 Submit pull requests (please read contribution guidelines)
 - 📖 Improve documentation
 - 🎨 Add new boss data, items, or quest information
 - ⚖️ Help balance the game economy
 
-**For developers:**
+### In-App Feedback System
+
+RuneTiles includes a built-in feedback system that makes it easy for players to report issues:
+
+1. Click **Settings** (⚙️) in the top-right corner
+2. Click **"Report Issue / Suggest Feature"**
+3. Choose bug report or feature request
+4. (Optional) Add a description
+5. Submit - your feedback creates a GitHub issue automatically!
+
+**For bug reports:** We automatically include your game state data to help us reproduce and fix the issue faster.
+
+### For Developers
+
 - Code is modular - task generators are in `src/utils/generators/`
 - Balance configuration is centralized in `src/config/rewards.ts` and `src/config/shop.ts`
 - Check out `src/config/README.md` for configuration guidelines
+- See `ENV_SETUP.md` for setting up the feedback system with GitHub API
 
 ## 🙏 Acknowledgments
 

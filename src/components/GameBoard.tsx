@@ -9,6 +9,7 @@ import { SettingsModal } from './SettingsModal';
 import { ChangelogModal } from './ChangelogModal';
 import { WelcomeModal } from './WelcomeModal';
 import { SupportModal } from './SupportModal';
+import { FeedbackModal } from './FeedbackModal';
 import { ShopModal } from './ShopModal';
 import { DailyTasksModal } from './DailyTasksModal';
 import { SLAYER_REWARDS } from '@/config/rewards';
@@ -35,6 +36,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showShopModal, setShowShopModal] = useState(false);
   const [showDailyModal, setShowDailyModal] = useState(false);
   const [dailyTasks, setDailyTasks] = useState(generateAllDailyTasks());
@@ -1333,6 +1335,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         onFontChange={setUseRunescapeFont}
         onResetProgress={handleResetProgress}
         onViewChangelog={() => setShowChangelogModal(true)}
+        onOpenFeedback={() => setShowFeedbackModal(true)}
       />
 
       {/* Welcome Modal */}
@@ -1349,6 +1352,15 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         <SupportModal
           isOpen={showSupportModal}
           onClose={() => setShowSupportModal(false)}
+        />
+      )}
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <FeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          playerName={gameState.playerName}
         />
       )}
 

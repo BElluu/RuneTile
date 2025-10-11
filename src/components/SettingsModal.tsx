@@ -8,6 +8,7 @@ interface SettingsModalProps {
   onFontChange: (useRunescapeFont: boolean) => void;
   onResetProgress: () => void;
   onViewChangelog: () => void;
+  onOpenFeedback: () => void;
 }
 
 export function SettingsModal({ 
@@ -16,7 +17,8 @@ export function SettingsModal({
   useRunescapeFont, 
   onFontChange,
   onResetProgress,
-  onViewChangelog
+  onViewChangelog,
+  onOpenFeedback
 }: SettingsModalProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [enableAnimations, setEnableAnimations] = useState(false);
@@ -92,6 +94,37 @@ export function SettingsModal({
             </div>
 
             {/* Changelog Button */}
+            {/* Report Issue */}
+            <div className="space-y-2 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
+              <label className="text-white text-sm font-semibold">Feedback</label>
+              <button
+                onClick={() => {
+                  onOpenFeedback();
+                  onClose();
+                }}
+                className="w-full px-4 py-2 text-white rounded text-sm border"
+                style={{
+                  background: 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)',
+                  borderColor: '#2F5522',
+                  transition: 'transform 0.2s, background 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #7DB95C 0%, #5A8F42 50%, #3A6528 100%)';
+                    e.currentTarget.style.transform = 'scale(1.01)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (enableAnimations) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }
+                }}
+              >
+                🐛 Report Issue / Suggest Feature
+              </button>
+            </div>
+
             <div className="space-y-2 pt-4 border-t" style={{ borderColor: '#4a443f' }}>
               <label className="text-white text-sm font-semibold">What's New</label>
               <button
