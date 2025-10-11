@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState } from '@/types/game';
-import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters, shouldRefreshStats, getLastSeenVersion, saveLastSeenVersion } from '@/utils/gameStorage';
+import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters, shouldRefreshStats, getLastSeenVersion, saveLastSeenVersion, updateSlayerMastersForQuests } from '@/utils/gameStorage';
 import { generateVisibleTiles, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
 import { getTaskIcon } from '@/utils/taskGenerator';
 import { SkillsPanel } from './SkillsPanel';
@@ -47,27 +47,31 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const gameBoardRef = React.useRef<HTMLDivElement>(null);
   const wheelListenerRef = React.useRef<((e: Event) => void) | null>(null);
-  const [slayerMasters, setSlayerMasters] = useState([
-    { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.turael },
-    { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.spria },
-    { name: 'Mazchna', image: '/src/assets/slayer_masters/Mazchna_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.mazchna },
-    { name: 'Vannaka', image: '/src/assets/slayer_masters/Vannaka_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.vannaka },
-    { name: 'Chaeldar', image: '/src/assets/slayer_masters/Chaeldar_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.chaeldar },
-    { name: 'Duradel', image: '/src/assets/slayer_masters/Duradel_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.duradel },
-    { name: 'Nieve', image: '/src/assets/slayer_masters/Nieve_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.nieve },
-    { name: 'Konar', image: '/src/assets/slayer_masters/Konar_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.konar },
-    { name: 'Krystilia', image: '/src/assets/slayer_masters/Krystilia_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.krystilia },
-  ]);
+  const [slayerMasters, setSlayerMasters] = useState(() => {
+    // Try to load from localStorage first
+    const savedSlayerMasters = loadSlayerMasters();
+    if (savedSlayerMasters) {
+      return savedSlayerMasters;
+    }
+    
+    // If no saved state, return default
+    return [
+      { name: 'Turael', image: '/src/assets/slayer_masters/Turael_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.turael },
+      { name: 'Spria', image: '/src/assets/slayer_masters/Spria_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.spria },
+      { name: 'Mazchna', image: '/src/assets/slayer_masters/Mazchna_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.mazchna },
+      { name: 'Vannaka', image: '/src/assets/slayer_masters/Vannaka_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.vannaka },
+      { name: 'Chaeldar', image: '/src/assets/slayer_masters/Chaeldar_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.chaeldar },
+      { name: 'Duradel', image: '/src/assets/slayer_masters/Duradel_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.duradel },
+      { name: 'Nieve', image: '/src/assets/slayer_masters/Nieve_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.nieve },
+      { name: 'Konar', image: '/src/assets/slayer_masters/Konar_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.konar },
+      { name: 'Krystilia', image: '/src/assets/slayer_masters/Krystilia_head.png', tasksCompleted: 0, requiredTasks: SLAYER_REWARDS.tasksRequired.krystilia },
+    ];
+  });
 
   useEffect(() => {
     const savedGame = loadGameState();
     if (savedGame && savedGame.playerName === playerName) {
       loadGame();
-    }
-
-    const savedSlayerMasters = loadSlayerMasters();
-    if (savedSlayerMasters) {
-      setSlayerMasters(savedSlayerMasters);
     }
 
     // Check version and show changelog if needed
@@ -141,10 +145,37 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
   useEffect(() => {
     if (gameState) {
-      generateTasksForVisibleTiles(gameState, gameState.playerName).then(updatedGameState => {
+      // Only check quests (for slayer masters swapping) if they're not already completed
+      const needsQuestCheck = !gameState.questsCompleted || 
+                              !gameState.questsCompleted.whileGuthixSleeps || 
+                              !gameState.questsCompleted.monkeyMadness2;
+
+      let callbackCalled = false;
+      let questsStatus: { whileGuthixSleeps: boolean; monkeyMadness2: boolean } | null = null;
+
+      const handleQuestsChecked = needsQuestCheck 
+        ? (quests: { whileGuthixSleeps: boolean; monkeyMadness2: boolean }) => {
+            if (callbackCalled) return;
+            callbackCalled = true;
+
+            questsStatus = quests;
+            
+            const updatedMasters = updateSlayerMastersForQuests(slayerMasters, quests);
+            if (JSON.stringify(updatedMasters) !== JSON.stringify(slayerMasters)) {
+              setSlayerMasters(updatedMasters);
+              saveSlayerMasters(updatedMasters);
+            }
+          }
+        : undefined;
+
+      generateTasksForVisibleTiles(gameState, gameState.playerName, handleQuestsChecked).then(updatedGameState => {
         if (JSON.stringify(updatedGameState.tileTasks) !== JSON.stringify(gameState.tileTasks)) {
-          setGameState(updatedGameState);
-          saveGameState(updatedGameState);
+          const finalState = questsStatus 
+            ? { ...updatedGameState, questsCompleted: questsStatus }
+            : { ...updatedGameState, questsCompleted: gameState.questsCompleted };
+          
+          setGameState(finalState);
+          saveGameState(finalState);
         }
       });
     }
@@ -157,6 +188,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
       const savedState = loadGameState();
       
       if (savedState && savedState.playerName === playerName) {
+        if (savedState.questsCompleted) {
+          const updatedMasters = updateSlayerMastersForQuests(slayerMasters, savedState.questsCompleted);
+          if (JSON.stringify(updatedMasters) !== JSON.stringify(slayerMasters)) {
+            setSlayerMasters(updatedMasters);
+            saveSlayerMasters(updatedMasters);
+          }
+        }
+
         if (shouldRefreshStats(savedState)) {
           try {
             const response = await fetch(`/api/hiscores/${encodeURIComponent(playerName)}`);

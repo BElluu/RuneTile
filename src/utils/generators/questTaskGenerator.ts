@@ -1,9 +1,13 @@
-import type { GeneratedTask, QuestData, TaskReward } from '@/types/game';
+import type { GeneratedTask, QuestData, TaskReward, GameState } from '@/types/game';
 import { TaskCategory, TaskDifficulty } from '@/types/game';
 import { QUEST_REWARDS, QUEST_DIFFICULTY_THRESHOLDS } from '@/config/rewards';
 import { generateBossTask } from './bossTaskGenerator';
 
-export async function generateQuestTask(tileId: string, playerName: string): Promise<GeneratedTask> {
+export async function generateQuestTask(
+  tileId: string, 
+  playerName: string,
+  onQuestsChecked?: (quests: { whileGuthixSleeps: boolean; monkeyMadness2: boolean }) => void
+): Promise<GeneratedTask> {
   try {
     const response = await fetch(`/api/quests/${encodeURIComponent(playerName)}`);
     if (!response.ok) {
@@ -12,6 +16,20 @@ export async function generateQuestTask(tileId: string, playerName: string): Pro
     
     const data = await response.json();
     const quests: QuestData[] = Array.isArray(data) ? data : (data.quests || []);
+    
+    // Check for slayer masters swapping and notify callback (only if callback is provided)
+    // Callback will be undefined if both quests are already completed
+    if (onQuestsChecked) {
+      const whileGuthixSleeps = quests.some(q => 
+        q.title === 'While Guthix Sleeps' && q.status === 'COMPLETED'
+      );
+      
+      const monkeyMadness2 = quests.some(q => 
+        q.title === 'Monkey Madness II' && q.status === 'COMPLETED'
+      );
+      
+      onQuestsChecked({ whileGuthixSleeps, monkeyMadness2 });
+    }
     
     // Filter quests that player can start and are not completed
     const availableQuests = quests.filter(quest => 
@@ -63,4 +81,3 @@ function getDifficultyFromQuestPoints(questPoints: number): TaskDifficulty {
   if (questPoints <= QUEST_DIFFICULTY_THRESHOLDS.hard) return TaskDifficulty.HARD;
   return TaskDifficulty.ELITE;
 }
-

@@ -105,18 +105,35 @@ export const SLAYER_REWARDS = {
   // Number of tasks required for each master's reward
   tasksRequired: {
     turael: 10,      // Easy master = more tasks
+    aya: 10,
     spria: 10,
     mazchna: 8,
+    achtryn: 8,
     vannaka: 7,
     chaeldar: 6,
-    duradel: 5,      // Hard master = fewer tasks
-    nieve: 5,
-    konar: 4,        // Special master = even fewer
+    konar: 5,        // Special master = even fewer
+    nieve: 4,
+    steve: 4,
+    duradel: 3,      // Hard master = fewer tasks
+    kuradal: 3,
     krystilia: 3,    // Wilderness = dangerous but rewarding
   },
   // Rewards for completing the required number of tasks
   keysPerMilestone: 1,
   goldBonus: 200,
+} as const;
+
+// Slayer master replacements based on quest completion
+// Source: https://oldschool.runescape.wiki/w/Slayer_Master
+export const SLAYER_MASTER_REPLACEMENTS = {
+  whileGuthixSleeps: [
+    { old: 'Turael', new: 'Aya', oldImage: '/src/assets/slayer_masters/Turael_head.png', newImage: '/src/assets/slayer_masters/Aya_head.png' },
+    { old: 'Mazchna', new: 'Achtryn', oldImage: '/src/assets/slayer_masters/Mazchna_head.png', newImage: '/src/assets/slayer_masters/Achtryn_head.png' },
+    { old: 'Duradel', new: 'Kuradal', oldImage: '/src/assets/slayer_masters/Duradel_head.png', newImage: '/src/assets/slayer_masters/Kuradal_head.png' },
+  ],
+  monkeyMadness2: [
+    { old: 'Nieve', new: 'Steve', oldImage: '/src/assets/slayer_masters/Nieve_head.png', newImage: '/src/assets/slayer_masters/Steve_head.png' },
+  ],
 } as const;
 
 // ============================================

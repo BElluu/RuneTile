@@ -27,7 +27,8 @@ export async function generateTaskForTile(
   tileId: string, 
   playerStats: PlayerStats, 
   playerName: string,
-  excludedCategories: string[] = []
+  excludedCategories: string[] = [],
+  onQuestsChecked?: (quests: { whileGuthixSleeps: boolean; monkeyMadness2: boolean }) => void
 ): Promise<GeneratedTask> {
   // Specjalne zadanie startowe dla kafelka (0,0)
   if (tileId === '0,0') {
@@ -52,7 +53,7 @@ export async function generateTaskForTile(
       case TaskCategory.SKILL:
         return generateSkillTask(tileId, playerStats);
       case TaskCategory.QUEST:
-        return await generateQuestTask(tileId, playerName);
+        return await generateQuestTask(tileId, playerName, onQuestsChecked);
       case TaskCategory.BOSS:
         return generateBossTask(tileId);
       case TaskCategory.DROP:

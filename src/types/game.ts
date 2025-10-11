@@ -148,6 +148,10 @@ export interface GameState {
   tileTasks: Record<string, GeneratedTask>; // tileId -> task
   lastUpdated: number;
   statsLastFetched?: number;
+  questsCompleted?: {
+    whileGuthixSleeps?: boolean;
+    monkeyMadness2?: boolean;
+  };
 }
 
 export interface TilePosition {

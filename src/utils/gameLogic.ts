@@ -120,7 +120,11 @@ export async function generateInitialGameState(playerName: string, playerStats: 
   };
 }
 
-export async function generateTasksForVisibleTiles(gameState: GameState, playerName: string): Promise<GameState> {
+export async function generateTasksForVisibleTiles(
+  gameState: GameState, 
+  playerName: string,
+  onQuestsChecked?: (quests: { whileGuthixSleeps: boolean; monkeyMadness2: boolean }) => void
+): Promise<GameState> {
   const visibleTiles = generateVisibleTiles(gameState);
   const newTileTasks = { ...gameState.tileTasks };
   
@@ -147,7 +151,7 @@ export async function generateTasksForVisibleTiles(gameState: GameState, playerN
       const y = parseInt(parts[1] || '0', 10);
       if (isNaN(x) || isNaN(y)) continue;
       
-      let task = await generateTaskForTile(tileId, gameState.playerStats, playerName);
+      let task = await generateTaskForTile(tileId, gameState.playerStats, playerName, [], onQuestsChecked);
       let attempts = 0;
       const maxAttempts = 10;
       let excludedCategories: string[] = [];
@@ -160,7 +164,7 @@ export async function generateTasksForVisibleTiles(gameState: GameState, playerN
           excludedCategories.push(task.category);
         }
         
-        task = await generateTaskForTile(tileId, gameState.playerStats, playerName, excludedCategories);
+        task = await generateTaskForTile(tileId, gameState.playerStats, playerName, excludedCategories, onQuestsChecked);
       }
       
       newTileTasks[tileId] = task;

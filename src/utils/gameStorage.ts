@@ -1,5 +1,5 @@
 import type { GameState, PlayerStats } from '@/types/game';
-import { SLAYER_REWARDS } from '@/config/rewards';
+import { SLAYER_REWARDS, SLAYER_MASTER_REPLACEMENTS } from '@/config/rewards';
 
 const GAME_STATE_KEY = 'runeTiles_gameState';
 const VERSION_KEY = 'runeTiles_version';
@@ -134,6 +134,47 @@ export function shouldRefreshStats(gameState: GameState | null): boolean {
   
   const timeSinceLastFetch = Date.now() - gameState.statsLastFetched;
   return timeSinceLastFetch >= STATS_REFRESH_INTERVAL;
+}
+
+/**
+ * Update slayer masters based on completed quests
+ * Returns updated slayer masters array
+ */
+export function updateSlayerMastersForQuests(
+  currentMasters: any[],
+  questsCompleted: { whileGuthixSleeps?: boolean; monkeyMadness2?: boolean }
+): any[] {
+  let updated = [...currentMasters];
+  
+  // Apply While Guthix Sleeps replacements
+  if (questsCompleted.whileGuthixSleeps) {
+    SLAYER_MASTER_REPLACEMENTS.whileGuthixSleeps.forEach(replacement => {
+      const masterIndex = updated.findIndex(m => m.name === replacement.old);
+      if (masterIndex !== -1) {
+        updated[masterIndex] = {
+          ...updated[masterIndex],
+          name: replacement.new,
+          image: replacement.newImage
+        };
+      }
+    });
+  }
+  
+  // Apply Monkey Madness II replacements
+  if (questsCompleted.monkeyMadness2) {
+    SLAYER_MASTER_REPLACEMENTS.monkeyMadness2.forEach(replacement => {
+      const masterIndex = updated.findIndex(m => m.name === replacement.old);
+      if (masterIndex !== -1) {
+        updated[masterIndex] = {
+          ...updated[masterIndex],
+          name: replacement.new,
+          image: replacement.newImage
+        };
+      }
+    });
+  }
+  
+  return updated;
 }
 
 // ============================================
