@@ -8,6 +8,7 @@ import { SlayerMastersModal } from './SlayerMastersModal';
 import { SettingsModal } from './SettingsModal';
 import { ChangelogModal } from './ChangelogModal';
 import { WelcomeModal } from './WelcomeModal';
+import { SupportModal } from './SupportModal';
 import { ShopModal } from './ShopModal';
 import { DailyTasksModal } from './DailyTasksModal';
 import { SLAYER_REWARDS } from '@/config/rewards';
@@ -33,6 +34,7 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
   const [showShopModal, setShowShopModal] = useState(false);
   const [showDailyModal, setShowDailyModal] = useState(false);
   const [dailyTasks, setDailyTasks] = useState(generateAllDailyTasks());
@@ -824,15 +826,16 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
 
         {/* Main board */}
         <div className="flex-1 flex flex-col relative">
-          {/* Buy Me a Coffee */}
+          {/* Support Button */}
           <div className="absolute bottom-4 right-4 z-10">
-            <a
-              href="https://buymeacoffee.com/belluu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block transition-all duration-200"
+            <button
+              onClick={() => setShowSupportModal(true)}
+              className="transition-all duration-200 cursor-pointer"
               style={{
-                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
+                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))',
+                background: 'none',
+                border: 'none',
+                padding: 0
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.05) translateY(-2px)';
@@ -842,17 +845,18 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
                 e.currentTarget.style.transform = 'scale(1) translateY(0)';
                 e.currentTarget.style.filter = 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))';
               }}
+              title="Support Development"
             >
               <img
                 src="/src/assets/buymeacoffee.png"
-                alt="Buy Me A Coffee"
+                alt="Support Development"
                 style={{
                   height: '40px',
                   width: 'auto',
                   borderRadius: '8px'
                 }}
               />
-            </a>
+            </button>
           </div>
 
           {/* Zoom controls and Settings */}
@@ -1337,6 +1341,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
           isOpen={showWelcomeModal}
           onClose={() => setShowWelcomeModal(false)}
           playerName={gameState.playerName}
+        />
+      )}
+
+      {/* Support Modal */}
+      {showSupportModal && (
+        <SupportModal
+          isOpen={showSupportModal}
+          onClose={() => setShowSupportModal(false)}
         />
       )}
 
