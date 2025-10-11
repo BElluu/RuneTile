@@ -2,7 +2,7 @@
 
 ## 🎯 How It Works
 
-RuneTile uses semantic versioning (`MAJOR.MINOR.PATCH`) to track releases:
+RuneTiles uses semantic versioning (`MAJOR.MINOR.PATCH`) to track releases:
 - **MAJOR**: Breaking changes or major features
 - **MINOR**: New features, backward compatible
 - **PATCH**: Bug fixes and small improvements

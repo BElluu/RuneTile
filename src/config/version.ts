@@ -19,7 +19,7 @@ export interface ChangelogEntry {
 export const CURRENT_CHANGELOG: ChangelogEntry[] = [
   {
     category: 'feature',
-    description: 'Initial release of RuneTile game'
+    description: 'Initial release of RuneTiles game'
   },
   {
     category: 'feature',
