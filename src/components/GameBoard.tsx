@@ -3,7 +3,7 @@ import type { GameState } from '@/types/game';
 import { loadGameState, saveGameState, updatePlayerStats, saveSlayerMasters, loadSlayerMasters, shouldRefreshStats, getLastSeenVersion, saveLastSeenVersion, updateSlayerMastersForQuests } from '@/utils/gameStorage';
 import { generateVisibleTiles, canUnlockTile, unlockTile, generateInitialGameState, generateTasksForVisibleTiles } from '@/utils/gameLogic';
 import { getTaskIcon } from '@/utils/taskGenerator';
-import { SkillsPanel } from './SkillsPanel';
+import { SkillsModal } from './SkillsModal';
 import { SlayerMastersPanel } from './SlayerMastersPanel';
 import { SettingsModal } from './SettingsModal';
 import { ChangelogModal } from './ChangelogModal';
@@ -1033,29 +1033,14 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
         </div>
       </div>
 
-      {/* Skills Popup */}
-      {showSkillsModal && (
-        <div className="absolute top-4 left-32 z-20">
-          <div 
-            className="p-3 rounded border-2"
-            style={{
-              backgroundColor: '#3a3530',
-              borderColor: '#574f47'
-            }}
-          >
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold text-white">Skills</h3>
-              <button
-                onClick={() => setShowSkillsModal(false)}
-                className="text-white hover:text-gray-300 text-lg"
-              >
-                ×
-              </button>
-            </div>
-            <SkillsPanel playerStats={gameState.playerStats} statsLastFetched={gameState.statsLastFetched} />
-          </div>
-        </div>
-      )}
+      {/* Skills Modal */}
+      <SkillsModal
+        isOpen={showSkillsModal}
+        onClose={() => setShowSkillsModal(false)}
+        playerName={gameState.playerName}
+        playerStats={gameState.playerStats}
+        statsLastFetched={gameState.statsLastFetched}
+      />
 
               {/* Slayer Masters Popup */}
               {showSlayerModal && (
