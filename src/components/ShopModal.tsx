@@ -50,7 +50,12 @@ export function ShopModal({ isOpen, onClose, currentGold, currentKeys, onPurchas
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            🏪 Shop
+            <img 
+              src="/src/assets/menu/GrandExchange_icon.png" 
+              alt="Shop" 
+              className="w-8 h-8"
+            />
+            Shop
           </h2>
           <button
             onClick={onClose}
