@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { APP_VERSION } from '../config/version';
+import { canSubmitFeedback, recordFeedbackSubmission, getTimeUntilNextSubmission } from '../utils/feedbackLimiter';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -13,8 +14,24 @@ export function FeedbackModal({ isOpen, onClose, playerName }: FeedbackModalProp
   const [feedbackType, setFeedbackType] = useState<FeedbackType>('bug');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error' | 'rate-limited'>('idle');
   const [issueUrl, setIssueUrl] = useState<string>('');
+  const [rateLimitMessage, setRateLimitMessage] = useState<string>('');
+  const [waitMinutes, setWaitMinutes] = useState<number>(0);
+
+  // Check rate limit when modal opens
+  useEffect(() => {
+    if (isOpen && playerName) {
+      const check = canSubmitFeedback(playerName);
+      if (!check.allowed) {
+        setSubmitStatus('rate-limited');
+        setRateLimitMessage(check.reason || 'Please wait before submitting again.');
+        setWaitMinutes(check.waitMinutes || 0);
+      } else {
+        setSubmitStatus('idle');
+      }
+    }
+  }, [isOpen, playerName]);
 
   if (!isOpen) return null;
 
@@ -31,6 +48,15 @@ export function FeedbackModal({ isOpen, onClose, playerName }: FeedbackModalProp
 
     if (feedbackType === 'bug' && !description.trim()) {
       alert('Please provide a description of the bug.');
+      return;
+    }
+
+    // Check rate limit before submission
+    const rateLimitCheck = canSubmitFeedback(playerName || 'Unknown');
+    if (!rateLimitCheck.allowed) {
+      setSubmitStatus('rate-limited');
+      setRateLimitMessage(rateLimitCheck.reason || 'Please wait before submitting again.');
+      setWaitMinutes(rateLimitCheck.waitMinutes || 0);
       return;
     }
 
@@ -58,6 +84,9 @@ export function FeedbackModal({ isOpen, onClose, playerName }: FeedbackModalProp
         const data = await response.json();
         setIssueUrl(data.issueUrl || '');
         setSubmitStatus('success');
+        
+        // Record successful submission for rate limiting
+        recordFeedbackSubmission(playerName || 'Unknown', feedbackType);
       } else {
         setSubmitStatus('error');
       }
@@ -348,6 +377,45 @@ export function FeedbackModal({ isOpen, onClose, playerName }: FeedbackModalProp
               className="block w-full mt-3 px-6 py-2 text-gray-400 hover:text-white"
             >
               Try Again
+            </button>
+          </div>
+        )}
+
+        {submitStatus === 'rate-limited' && (
+          <div className="text-center py-8">
+            <div className="text-6xl mb-4">⏱️</div>
+            <h3 className="text-2xl font-bold text-yellow-400 mb-2">Please Wait</h3>
+            <p className="text-gray-300 mb-4">
+              {rateLimitMessage}
+            </p>
+            <div className="p-4 rounded mb-6" style={{ backgroundColor: '#1a1714' }}>
+              <p className="text-sm text-gray-400">
+                <strong className="text-white">Why the limit?</strong><br/>
+                To prevent spam and ensure quality feedback, there's a 30-minute cooldown between submissions.
+              </p>
+            </div>
+            <button
+              onClick={handleClose}
+              className="px-6 py-3 text-white font-bold rounded transition-all duration-200"
+              style={{
+                background: 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)',
+                border: '3px solid',
+                borderColor: '#2F5522',
+                borderTopColor: '#8FBF6F',
+                borderLeftColor: '#8FBF6F',
+                boxShadow: '2px 2px 0px rgba(0,0,0,0.5)',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(180deg, #7DB95C 0%, #5A8F42 50%, #3A6528 100%)';
+                e.currentTarget.style.transform = 'scale(1.02)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(180deg, #6B9E4E 0%, #4A7A34 50%, #2F5522 100%)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              Close
             </button>
           </div>
         )}
