@@ -614,169 +614,257 @@ export function GameBoard({ playerName, onPlayerNameChange }: GameBoardProps) {
   return (
     <div ref={gameBoardRef} className="game-board min-h-screen text-white w-full">
       <div className="flex h-screen w-full">
-        <div className="absolute top-4 left-4 z-10 flex gap-2">
+        <div className="absolute top-4 left-4 z-10 flex gap-3">
+          {/* Keys Display */}
           <div 
-            className="p-3 rounded border-2 flex flex-col items-center"
+            className="px-4 py-2 rounded-lg flex items-center gap-2.5 shadow-lg"
             style={{
-              backgroundColor: '#3a3530',
-              borderColor: '#574f47'
+              background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%)',
+              border: '2px solid rgba(96, 165, 250, 0.3)',
+              backdropFilter: 'blur(10px)'
             }}
           >
             <img 
               src="/src/assets/menu/key_icon.png" 
               alt="Key" 
-              className="w-6 h-6 mb-1"
+              className="w-7 h-7"
+              style={{ imageRendering: 'pixelated' }}
             />
-            <div className="text-white font-bold text-lg">{gameState.keys}</div>
+            <div className="text-white font-bold text-xl" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+              {gameState.keys}
+            </div>
           </div>
+
+          {/* Gold Display + Shop Button */}
           <button
             onClick={() => setShowShopModal(true)}
-            className="p-3 rounded border-2 flex flex-col items-center transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-lg flex items-center gap-2.5 cursor-pointer shadow-lg transition-all duration-200"
             style={{
-              backgroundColor: '#3a3530',
-              borderColor: '#574f47'
+              background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%)',
+              border: '2px solid rgba(251, 191, 36, 0.3)',
+              backdropFilter: 'blur(10px)'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(251, 191, 36, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
             title="Open Shop"
           >
             <img 
               src="/src/assets/menu/gold_icon.png" 
               alt="Gold" 
-              className="w-6 h-6 mb-1"
+              className="w-7 h-7"
+              style={{ imageRendering: 'pixelated' }}
             />
-            <div className="text-white font-bold text-lg">{gameState.gold.toLocaleString()}</div>
+            <div className="text-white font-bold text-xl" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+              {gameState.gold.toLocaleString()}
+            </div>
           </button>
+
+          {/* Stats Button */}
           <button
             onClick={() => setShowSkillsModal(!showSkillsModal)}
-            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            className="px-4 py-2 rounded-lg flex items-center gap-2.5 transition-all duration-200 shadow-lg"
             style={{
-              backgroundColor: '#3a3530',
-              borderColor: '#574f47'
+              background: 'linear-gradient(135deg, rgba(139, 115, 85, 0.3) 0%, rgba(87, 79, 71, 0.2) 100%)',
+              border: '2px solid rgba(139, 115, 85, 0.4)',
+              backdropFilter: 'blur(10px)'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(139, 115, 85, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
             title="Skills"
           >
             <img 
               src="/src/assets/menu/Stats_icon.png" 
               alt="Stats" 
-              className="w-6 h-6 mb-1"
+              className="w-7 h-7"
+              style={{ imageRendering: 'pixelated' }}
             />
-            <div className="text-white font-bold text-sm">Stats</div>
+            <div className="text-white font-bold text-base" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+              Stats
+            </div>
           </button>
         </div>
 
 
         {/* Left panel */}
-        <div className="absolute left-4 top-32 z-10 flex flex-col gap-2">
+        <div className="absolute left-4 top-32 z-10 flex flex-col gap-3">
           {/* Daily */}
           <button 
             onClick={() => setShowDailyModal(true)}
-            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            className="px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 shadow-lg"
             style={{
-              backgroundColor: '#3a3530',
-              borderColor: '#574f47'
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(147, 51, 234, 0.15) 100%)',
+              border: '2px solid rgba(168, 85, 247, 0.4)',
+              backdropFilter: 'blur(10px)',
+              minWidth: '120px'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateX(4px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(168, 85, 247, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
           >
             <img 
               src="/src/assets/menu/Daily_icon.png" 
               alt="Daily" 
-              className="w-6 h-6 mb-1"
+              className="w-7 h-7"
+              style={{ imageRendering: 'pixelated' }}
             />
-            <div className="text-white font-bold text-sm">Daily</div>
+            <div className="text-white font-bold text-base" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+              Daily
+            </div>
           </button>
 
           {/* Slayer */}
           <button 
             onClick={() => setShowSlayerModal(!showSlayerModal)}
-            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            className="px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 shadow-lg"
             style={{
-              backgroundColor: '#3a3530',
-              borderColor: '#574f47'
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.15) 100%)',
+              border: '2px solid rgba(239, 68, 68, 0.4)',
+              backdropFilter: 'blur(10px)',
+              minWidth: '120px'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateX(4px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(239, 68, 68, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
           >
             <img 
               src="/src/assets/menu/SlayerMasters_icon.png" 
               alt="Slayer" 
-              className="w-6 h-6 mb-1"
+              className="w-7 h-7"
+              style={{ imageRendering: 'pixelated' }}
             />
-            <div className="text-white font-bold text-sm">Slayer</div>
+            <div className="text-white font-bold text-base" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+              Slayer
+            </div>
           </button>
 
           {/* Bosses */}
           <button 
-            className="p-3 rounded border-2 flex flex-col items-center transition-colors"
+            className="px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 shadow-lg"
             style={{
-              backgroundColor: '#3a3530',
-              borderColor: '#574f47',
+              background: 'linear-gradient(135deg, rgba(139, 115, 85, 0.3) 0%, rgba(87, 79, 71, 0.2) 100%)',
+              border: '2px solid rgba(139, 115, 85, 0.4)',
+              backdropFilter: 'blur(10px)',
+              minWidth: '120px',
               display: 'none' // Hidden for now
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateX(4px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(139, 115, 85, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
           >
             <img 
               src="/src/assets/tasks/Bosses_icon.png" 
               alt="Bosses" 
-              className="w-6 h-6 mb-1"
+              className="w-7 h-7"
+              style={{ imageRendering: 'pixelated' }}
             />
-            <div className="text-white font-bold text-sm">Bosses</div>
+            <div className="text-white font-bold text-base" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+              Bosses
+            </div>
           </button>
         </div>
 
         {/* Main board */}
         <div className="flex-1 flex flex-col relative">
           {/* Zoom controls and Settings */}
-          <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+          <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
             <button
               onClick={() => setShowSettingsModal(true)}
-              className="w-10 h-10 text-white border-2 rounded transition-colors flex items-center justify-center"
+              className="w-12 h-12 text-white rounded-lg flex items-center justify-center transition-all duration-200 shadow-lg"
               style={{
-                backgroundColor: '#3a3530',
-                borderColor: '#574f47'
+                background: 'linear-gradient(135deg, rgba(139, 115, 85, 0.3) 0%, rgba(87, 79, 71, 0.2) 100%)',
+                border: '2px solid rgba(139, 115, 85, 0.4)',
+                backdropFilter: 'blur(10px)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.15)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(139, 115, 85, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '';
+              }}
             >
               <img 
                 src="/src/assets/menu/Settings_icon.png" 
                 alt="Settings" 
                 className="w-6 h-6"
+                style={{ imageRendering: 'pixelated' }}
               />
             </button>
             <button
               onClick={() => handleZoom(0.1)}
-              className="w-10 h-10 text-white border-2 rounded transition-colors"
+              className="w-12 h-12 text-white rounded-lg transition-all duration-200 shadow-lg font-bold text-xl"
               style={{
-                backgroundColor: '#3a3530',
-                borderColor: '#574f47'
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.15) 100%)',
+                border: '2px solid rgba(34, 197, 94, 0.4)',
+                backdropFilter: 'blur(10px)',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.15)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(34, 197, 94, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '';
+              }}
             >
               +
             </button>
             <button
               onClick={() => handleZoom(-0.1)}
-              className="w-10 h-10 text-white border-2 rounded transition-colors"
+              className="w-12 h-12 text-white rounded-lg transition-all duration-200 shadow-lg font-bold text-xl"
               style={{
-                backgroundColor: '#3a3530',
-                borderColor: '#574f47'
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.15) 100%)',
+                border: '2px solid rgba(239, 68, 68, 0.4)',
+                backdropFilter: 'blur(10px)',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a443f'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a3530'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.15)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(239, 68, 68, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '';
+              }}
             >
-              -
+              −
             </button>
             <div 
-              className="w-10 h-10 text-white border-2 rounded flex items-center justify-center text-xs"
+              className="w-12 h-12 text-white rounded-lg flex items-center justify-center text-sm font-bold shadow-lg"
               style={{
-                backgroundColor: '#3a3530',
-                borderColor: '#574f47'
+                background: 'linear-gradient(135deg, rgba(139, 115, 85, 0.3) 0%, rgba(87, 79, 71, 0.2) 100%)',
+                border: '2px solid rgba(139, 115, 85, 0.4)',
+                backdropFilter: 'blur(10px)',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
               }}
             >
               {Math.round(zoom * 100)}%
